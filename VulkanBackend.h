@@ -85,6 +85,12 @@ namespace myapplication
 		}
 	};
 
+	struct UniformBufferObject {
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 proj;
+	};
+
 	using std::vector;
 	namespace backend
 	{
@@ -113,32 +119,33 @@ namespace myapplication
 
 		};
 
+		//TODO:
+		//隔离不同物体的uniform
 		class VulkanBackend
 		{
 		public:
-
+			//instance and device
 			VkInstance instance = nullptr;
 			VkPhysicalDevice phyDevice = nullptr;
 			VkDevice device = nullptr;
-
+			//queue
 			VkQueue queue = nullptr;
 			uint32_t queueFamilyIndex = 0;
-
+			//window surface handle
 			SDL_Window* window = nullptr;
 			VkSurfaceKHR surface = nullptr;
 			VkSurfaceCapabilitiesKHR surfaceCaps{};
-
+			//present swapchain
 			VkSwapchainKHR swapchain = nullptr;
 			vector<VkImage> swapchainImages;
 			vector<VkImageView> swapChainImageViews;
 			vector<VkFramebuffer> swapChainFramebuffers;
-
 			VkFormat swapchainImageFormat;
-
+			VkRenderPass presentRenderPass;
+			//cmd
 			VkCommandPool commandPool;
-
 			vector<VkCommandBuffer> commandBuffers;
-
+			//sync
 			vector<VkSemaphore> imageAvailableSemaphores;
 			vector<VkSemaphore> renderFinishedSemaphores;
 			vector<VkFence> inFlightFences;
@@ -146,6 +153,7 @@ namespace myapplication
 			const float queuePriorities = 1.0f;
 			static const int MAX_FRAMES_IN_FLIGHT = 2;
 
+			//extension feature
 			const vector<const char*> deviceExtensions{
 				VK_KHR_SWAPCHAIN_EXTENSION_NAME 
 			};
@@ -167,38 +175,25 @@ namespace myapplication
 				.samplerAnisotropy = VK_TRUE
 			};
 
-			//
-			VkDescriptorPool descriptorPool;
-			VkDescriptorSetLayout descriptorSetLayout;
-			VkPipelineLayout pipelineLayout;
-			VkRenderPass renderPass;
-			VkPipeline pipeline;
-
-			VkBuffer vertexBuffer;
-			VkDeviceMemory vertexBufferMemory;
-
-			std::vector<VkDeviceMemory> uniformBuffersMemory;
-			std::vector<void*> uniformBuffersMapped;
-
+		public:
 			uint32_t currentFrame = 0;
 
 		public:
-			std::vector<VkBuffer> uniformBuffers;
-			std::vector<VkDescriptorSet> descriptorSets;
 
 			void init();
 			void cleanup();
-			void render();
-			void render1(vector<VkBuffer>& buffers);
-
-			void createVertexBuffer(VkDeviceSize bufferSize, const void* vertexData, VkBuffer& buffer, VkDeviceMemory memnry);
-			void createUniformBuffer(VkDeviceSize bufferSize, VkBuffer& uniformBuffer, VkDeviceMemory& memory, void*& map);
-			//will support pipeline arg
-			//void recordCmdBuffer(VkCommandBuffer cmdBuffer, uint32_t imgIndex, uint32_t vertexCount);
-			//VkDescriptorSetLayout createDescriptorSetLayout();
-
-
-			void recordCommandBuffer1(VkCommandBuffer commandBuffer, uint32_t imageIndex, vector<VkBuffer>& vertexBuffers1);
+			void recordCommandBuffer(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
+				vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets);
+			void render(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
+				vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets);
+			VkRenderPass GetPresentRenderPass()
+			{
+				return presentRenderPass;
+			}
+			VkDevice GetDevive()
+			{
+				return device;
+			}
 			~VulkanBackend();
 		protected:
 			void initSDL();
@@ -217,28 +212,16 @@ namespace myapplication
 				VkMemoryPropertyFlags properties,
 				VkBuffer& buffer,
 				VkDeviceMemory& bufferMemory);
-			void createVertexBuffer();
-			void createUniformBuffers();
 
-			void createDescriptorPool();
-			void createDescriptorSets();
-			void createRenderPass();
-			void createDescriptorSetLayout();
-			void createRenderPipeline();
+			void createPresentRenderPass();
 
-			void createFramebuffers();
+			void createSwapchainFramebuffers();
 
 			void createCommandPool();
 			void createCommandBuffers();
 
-			void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-
 			void createSyncObjects();
-
-			void updateUniformBuffer(uint32_t currentImage, glm::mat4 modelMat4 = glm::mat4(1.0f));
 		};
-
-
 
 		class VulkanPipeline
 		{
@@ -246,7 +229,6 @@ namespace myapplication
 			VulkanBackend* backend;
 		public:
 			VulkanPipeline(VulkanBackend& backend);
-			//~VulkanPipeline();
 
 			VkDescriptorSetLayout CreateDescriptorSetLayout(vector<VkDescriptorSetLayoutBinding>& bindings);
 			VkPipelineLayout CreatePipelineLayout(VkDescriptorSetLayout& descriptorSetLayout);
@@ -259,18 +241,21 @@ namespace myapplication
 		private:
 			VulkanBackend* backend;
 			VkDescriptorPool descriptorPool;
+			VkCommandBuffer transferCmdBuffer;
 		public:
 			VulkanMemory(VulkanBackend& backend);
 			void CreateVertexBuffer(vector<VertexPC> vertices, VkBuffer& vertexBuffer, VkDeviceMemory& memory);
 			void CreateUniformBuffer(VkDeviceSize bufferSize, vector<VkBuffer>& buffers, vector<VkDeviceMemory>& memorys, vector<void*>& maps);
-			vector<VkDescriptorSet> CreateDescriptorSets(VkDescriptorSetLayout& descriptorSetLayout, vector<VkBuffer>& uniformBuffers);
+			vector<VkDescriptorSet> CreateDescriptorSets(VkDescriptorSetLayout descriptorSetLayout, vector<VkBuffer>& uniformBuffers);
 		private:
 			void InitDescriptorPool();
+			void InitTransferCmdBuffer();
 			void Cleanup();
 
 			VkBuffer CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage);
 			VkDeviceMemory AllocateDeviceMemory(VkDeviceSize allocateSize, uint32_t memoryTypeIndex);
 			uint32_t GetMemoryType(uint32_t memTpyeBit, VkMemoryPropertyFlags propertyFlags);
+			void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 		};
 	}
 }

@@ -131,13 +131,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="application.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="newBackend.cpp" />
-    <ClCompile Include="newBackend.h" />
     <ClCompile Include="shaderLoader.cpp" />
     <ClCompile Include="VulkanBackend.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="application.h" />
     <ClInclude Include="Component.hpp" />
     <ClInclude Include="EcsSceneManager.hpp" />
     <ClInclude Include="PipelineManagement.h" />
