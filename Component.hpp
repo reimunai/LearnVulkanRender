@@ -3,7 +3,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
 #include "VulkanBackend.h"
-namespace myapplication
+namespace el
 {
 	struct Vertex
 	{
@@ -13,7 +13,7 @@ namespace myapplication
 	};
 	namespace component
 	{
-		using namespace myapplication::backend;
+		using namespace el::backend;
 		class IComponent
 		{
 		public:
@@ -47,16 +47,18 @@ namespace myapplication
 		class MeshRenderer : public IComponent
 		{
 		public:
-			std::vector<VertexPC> mesh;
+			std::vector<VertexPNT> mesh;
+			std::vector<uint16_t> indices;
 
 			VkBuffer buffer;
-			VkDeviceMemory memory;
+			VmaAllocation allocation;
+			VmaAllocationInfo allocationInfo;
 			// Í¨¹ý IComponent ¼Ì³Ð
 			void RenderInit(VulkanMemory& vulkanMemory)
 			{
 				if (mesh.size() != 0)
 				{
-					vulkanMemory.CreateVertexBuffer(mesh, buffer, memory);
+					vulkanMemory.CreateVertexBuffer(mesh, buffer, allocation, allocationInfo);
 				}
 			}
 

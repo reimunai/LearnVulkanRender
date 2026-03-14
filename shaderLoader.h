@@ -1,10 +1,11 @@
+#pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <string>
 #include <fstream>
 using  std::string;
 using std::vector;
-namespace myapplication
+namespace el
 {
 	namespace resourcemanagement
 	{

@@ -1,6 +1,13 @@
-#pragma once
+#ifndef BACKEND_H
+#define BACKEND_H
 
+
+#pragma once
 #include <vulkan/vulkan.h>
+//#define VMA_STATIC_VULKAN_FUNCTIONS 0
+//#define VMA_DYNAMIC_VULKAN_FUNCTION 1
+//#define VMA_IMPLEMENTATION
+#include <vma/vk_mem_alloc.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 #include <vector>
@@ -8,8 +15,18 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "shaderLoader.h"
+
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+#include <array>
+#include <iostream>
+
 #include <chrono>
-namespace myapplication
+//TODO:
+//buffer device address
+namespace el
 {
 	enum class CullMode
 	{
@@ -85,6 +102,43 @@ namespace myapplication
 		}
 	};
 
+	struct VertexPNT
+	{
+		glm::vec3 pos;
+		glm::vec3 normal;
+		glm::vec2 texCoord;
+
+		static VkVertexInputBindingDescription getBindingDescription() {
+			VkVertexInputBindingDescription bindingDescription{};
+			bindingDescription.binding = 0;
+			bindingDescription.stride = sizeof(VertexPNT);
+			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+			return bindingDescription;
+		}
+
+		static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
+			std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+
+			attributeDescriptions[0].binding = 0;
+			attributeDescriptions[0].location = 0;
+			attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+			attributeDescriptions[0].offset = offsetof(VertexPNT, pos);
+
+			attributeDescriptions[1].binding = 0;
+			attributeDescriptions[1].location = 1;
+			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+			attributeDescriptions[1].offset = offsetof(VertexPNT, normal);
+
+			attributeDescriptions[2].binding = 0;
+			attributeDescriptions[2].location = 2;
+			attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+			attributeDescriptions[2].offset = offsetof(VertexPNT, texCoord);
+
+			return attributeDescriptions;
+		}
+	};
+
 	struct UniformBufferObject {
 		glm::mat4 model;
 		glm::mat4 view;
@@ -149,6 +203,13 @@ namespace myapplication
 			vector<VkSemaphore> imageAvailableSemaphores;
 			vector<VkSemaphore> renderFinishedSemaphores;
 			vector<VkFence> inFlightFences;
+			//depth test
+			VkFormat depthFormat;
+			VkImage depthImage;
+			VkImageView depthImageView;
+			VmaAllocation depthImageAllocation;
+			//vma
+			VmaAllocator allocator;
 
 			const float queuePriorities = 1.0f;
 			static const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -179,13 +240,18 @@ namespace myapplication
 			uint32_t currentFrame = 0;
 
 		public:
+			void Init();
+			void Cleanup();
 
-			void init();
-			void cleanup();
-			void recordCommandBuffer(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
+			
+			VkCommandBuffer beginSingleTimeCommands();
+			void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+			void RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
 				vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets);
-			void render(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
+			void Render(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
 				vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets);
+
 			VkRenderPass GetPresentRenderPass()
 			{
 				return presentRenderPass;
@@ -195,27 +261,24 @@ namespace myapplication
 				return device;
 			}
 			~VulkanBackend();
+
 		protected:
 			void initSDL();
 			void creatInstance();
 			void seletePhysicsDevice();
 			void setupDevice();
+			void InitVmaAllocator();
 			void createSwapchain();
 
 			void cleanupSwapChain();
 			void recreateSwapchain();
 
-			uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-			void createBuffer(
-				VkDeviceSize size,
-				VkBufferUsageFlags usage,
-				VkMemoryPropertyFlags properties,
-				VkBuffer& buffer,
-				VkDeviceMemory& bufferMemory);
-
 			void createPresentRenderPass();
 
 			void createSwapchainFramebuffers();
+
+			void SetDepthFormat();
+			void CreateDepthImage();
 
 			void createCommandPool();
 			void createCommandBuffers();
@@ -236,26 +299,34 @@ namespace myapplication
 			VkPipeline CreatePipeline(PipelineConfig config, VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass);
 		};
 
+		//VUlkanResource like uniform&vertex buffer, image, Sets
+		//will use VMA
 		class VulkanMemory
 		{
 		private:
 			VulkanBackend* backend;
 			VkDescriptorPool descriptorPool;
 			VkCommandBuffer transferCmdBuffer;
+
+			//vma
+			VmaAllocator allocator;
 		public:
 			VulkanMemory(VulkanBackend& backend);
-			void CreateVertexBuffer(vector<VertexPC> vertices, VkBuffer& vertexBuffer, VkDeviceMemory& memory);
+			void CreateIndexBuffer(vector<uint16_t>& indices, VkBuffer buffer, VmaAllocation allocation, VmaAllocationInfo& allocationInfo);
+			void CreateVertexBuffer(vector<VertexPNT>& vertices, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo& allocationInfo);
 			void CreateUniformBuffer(VkDeviceSize bufferSize, vector<VkBuffer>& buffers, vector<VkDeviceMemory>& memorys, vector<void*>& maps);
 			vector<VkDescriptorSet> CreateDescriptorSets(VkDescriptorSetLayout descriptorSetLayout, vector<VkBuffer>& uniformBuffers);
-		private:
-			void InitDescriptorPool();
-			void InitTransferCmdBuffer();
-			void Cleanup();
-
+			
 			VkBuffer CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage);
 			VkDeviceMemory AllocateDeviceMemory(VkDeviceSize allocateSize, uint32_t memoryTypeIndex);
 			uint32_t GetMemoryType(uint32_t memTpyeBit, VkMemoryPropertyFlags propertyFlags);
 			void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		private:
+			void InitVmaAllocator();
+			void InitDescriptorPool();
+			void InitTransferCmdBuffer();
+			void Cleanup();
 		};
 	}
 }
+#endif // !BACKEND_H

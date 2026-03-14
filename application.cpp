@@ -1,9 +1,11 @@
+#pragma once
 #include "application.h"
-using namespace myapplication::app;
+using namespace el::app;
+
 Application::Application()
 {
 	backend = new VulkanBackend();
-	backend->init();
+	backend->Init();
 	memory = new VulkanMemory(*backend);
 	pipelineManager = new VulkanPipeline(*backend);
 }
@@ -18,7 +20,7 @@ void Application::InitPipelineFamily(PipelineConfig config,vector<VkDescriptorSe
 
 void Application::Render(vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets)
 {
-	backend->render(rendPass, pipeline, layout, vertexBuffers, descriptorSets);
+	backend->Render(rendPass, pipeline, layout, vertexBuffers, descriptorSets);
 }
 
 VkDevice Application::GetDevice()

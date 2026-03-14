@@ -3,12 +3,12 @@
 #include <vulkan/vulkan.h>
 #include "VulkanBackend.h"
 #include <iostream>
-namespace myapplication
+namespace el
 {
 	namespace resourcemanagement
 	{
 		using std::vector;
-		using namespace myapplication::backend;
+		using namespace el::backend;
 		class PipelineStateManagement
 		{
 			//pilelineLineLayout

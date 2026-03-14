@@ -5,7 +5,7 @@
 #include <memory>
 #include <bitset>
 
-namespace myapplication
+namespace el
 {
 	namespace ecsstylecomponent
 	{

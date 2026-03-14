@@ -1,6 +1,7 @@
+#pragma once
 #include "shaderLoader.h"
 
-using namespace myapplication::resourcemanagement;
+using namespace el::resourcemanagement;
 
 VkShaderModule ShaderLoader::createShaderModule(const vector<char>& code, VkDevice device)
 {

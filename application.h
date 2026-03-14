@@ -1,16 +1,16 @@
 #pragma once
 #include "VulkanBackend.h"
 
-namespace myapplication
+namespace el
 {
 	namespace app
 	{
-		using namespace myapplication::backend;
+		using namespace el::backend;
 		//TODO:
 		//½ö²âÊÔ
 		class Application
 		{
-		private:
+		public:
 			VulkanBackend* backend;
 			VulkanPipeline* pipelineManager;
 			//pipeline Family
