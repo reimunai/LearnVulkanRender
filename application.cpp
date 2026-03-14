@@ -18,9 +18,10 @@ void Application::InitPipelineFamily(PipelineConfig config,vector<VkDescriptorSe
 	pipeline = pipelineManager->CreatePipeline(config, layout, rendPass);
 }
 
-void Application::Render(vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets)
+void Application::Render(vector<uint16_t>& indexCounts,
+	vector<VkBuffer>& vertexBuffers, vector<VkBuffer>& indexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets)
 {
-	backend->Render(rendPass, pipeline, layout, vertexBuffers, descriptorSets);
+	backend->Render(rendPass, pipeline, layout, indexCounts, vertexBuffers, indexBuffers, descriptorSets);
 }
 
 VkDevice Application::GetDevice()

@@ -483,8 +483,8 @@ void VulkanBackend::endSingleTimeCommands(VkCommandBuffer commandBuffer)
 	vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
 
-void VulkanBackend::RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
-	vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets)
+void VulkanBackend::RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout, vector<uint16_t>& indexCounts,
+	vector<VkBuffer>& vertexBuffers, vector<VkBuffer>& indexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets)
 {
 	VkCommandBuffer cmdBuffer = commandBuffers[currentFrame];
 	VkCommandBufferBeginInfo beginInfo{
@@ -546,6 +546,7 @@ void VulkanBackend::RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pipe
 		uint32_t count = 1;
 		vector<VkDeviceSize> offsets(count, 0);
 		vkCmdBindVertexBuffers(cmdBuffer, 0, count, &vertexBuffers[i], offsets.data());
+		vkCmdBindIndexBuffer(cmdBuffer, indexBuffers[i], 0, VK_INDEX_TYPE_UINT16);
 		vkCmdBindDescriptorSets(
 			cmdBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -556,7 +557,8 @@ void VulkanBackend::RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pipe
 			0,
 			nullptr);
 
-		vkCmdDraw(cmdBuffer, 12, 1, 0, 0);
+		//vkCmdDraw(cmdBuffer, 12, 1, 0, 0);
+		vkCmdDrawIndexed(cmdBuffer, static_cast<uint32_t>(indexCounts[i]), 1, 0, 0, 0);
 	}
 
 	vkCmdEndRenderPass(cmdBuffer);
@@ -591,8 +593,8 @@ void VulkanBackend::createSyncObjects()
 
 }
 
-void VulkanBackend::Render(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
-	vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets)
+void VulkanBackend::Render(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout, vector<uint16_t>& indexCounts,
+	vector<VkBuffer>& vertexBuffers, vector<VkBuffer>& indexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets)
 {
 	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -616,7 +618,7 @@ void VulkanBackend::Render(VkRenderPass renderPass, VkPipeline pipeline, VkPipel
 	//TODO:
 	//更好的cmd提交
 	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-	RecordCommandBuffer(renderPass, pipeline, pipelineLayout, vertexBuffers, descriptorSets);
+	RecordCommandBuffer(renderPass, pipeline, pipelineLayout, indexCounts, vertexBuffers, indexBuffers, descriptorSets);
 
 	//submit info
 	VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame]};
@@ -795,7 +797,7 @@ void VulkanMemory::Cleanup()
 	vkFreeCommandBuffers(backend->device, backend->commandPool, 1, &transferCmdBuffer);
 }
 
-void VulkanMemory::CreateIndexBuffer(vector<uint16_t>& indices, VkBuffer buffer, VmaAllocation allocation, VmaAllocationInfo& allocationInfo)
+void VulkanMemory::CreateIndexBuffer(vector<uint16_t>& indices, VkBuffer& buffer, VmaAllocation allocation, VmaAllocationInfo& allocationInfo)
 {
 	VkDeviceSize size = sizeof(indices[0]) * indices.size();
 	VkBufferCreateInfo bufferInfo{

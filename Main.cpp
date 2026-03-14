@@ -368,11 +368,12 @@ int main()
 	renderer1->mesh = {
 		{{-0.5f, -0.5f, 0.0f}, {0.6f, 0.6f, 0.6f},{0.0f, 1.0f}},
 		{{0.5f, -0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {0.0f, 0.0f}},
-
-		{{-0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {1.0f, 1.0f}},
 		{{0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {1.0f, 0.0f}},
+		{{-0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {0.0f, 0.0f}},
+	};
+	renderer1->indices = {
+		0, 1, 2,
+		0, 2, 3,
 	};
 	renderer1->RenderInit(*(app->memory));
 
@@ -381,18 +382,28 @@ int main()
 	renderer2->mesh = {
 		{{-0.5f, -0.5f, 0.0f}, {0.6f, 0.6f, 0.6f},{0.0f, 1.0f}},
 		{{0.5f, -0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {0.0f, 0.0f}},
-
-		{{-0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {1.0f, 1.0f}},
 		{{0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {1.0f, 0.0f}},
+		{{-0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {0.0f, 0.0f}},
+	};
+	renderer2->indices = {
+		0, 1, 2,
+		0, 2, 3,
 	};
 	renderer2->RenderInit(*(app->memory));
 
 
 	vector<VkBuffer> buffers(0);
-	buffers.push_back(renderer1->buffer);
-	buffers.push_back(renderer2->buffer);
+	buffers.push_back(renderer1->vertexBuffer);
+	buffers.push_back(renderer2->vertexBuffer);
+
+	vector<uint16_t> indexCounts(0);
+	indexCounts.push_back(static_cast<uint16_t>(renderer1->indices.size()));
+	indexCounts.push_back(static_cast<uint16_t>(renderer2->indices.size()));
+
+	vector<VkBuffer> indexBuffers(0);
+	indexBuffers.push_back(renderer1->indexBuffer);
+	indexBuffers.push_back(renderer2->indexBuffer);
+
 
 	bool quit = false;
 	SDL_Event event;
@@ -412,7 +423,7 @@ int main()
 
 		app->UpdateUniform(map, glm::vec3(0.0f, 0.0f, 0.0f));
 		app->UpdateUniform(map1, glm::vec3(0.0f, 0.0f, -0.2f));
-		app->Render(buffers, setSets);
+		app->Render(indexCounts, buffers, indexBuffers, setSets);
 
 		// º∆À„ FPS
 		float fps = 1.0f / deltaTime;

@@ -247,10 +247,10 @@ namespace el
 			VkCommandBuffer beginSingleTimeCommands();
 			void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
-			void RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
-				vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets);
-			void Render(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
-				vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets);
+			void RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout, vector<uint16_t>& indexCounts,
+				vector<VkBuffer>& vertexBuffers, vector<VkBuffer>& indicesBuffers, vector<vector<VkDescriptorSet>>& descriptorSets);
+			void Render(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout, vector<uint16_t>& indexCounts,
+				vector<VkBuffer>& vertexBuffers, vector<VkBuffer>& indexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets);
 
 			VkRenderPass GetPresentRenderPass()
 			{
@@ -312,7 +312,7 @@ namespace el
 			VmaAllocator allocator;
 		public:
 			VulkanMemory(VulkanBackend& backend);
-			void CreateIndexBuffer(vector<uint16_t>& indices, VkBuffer buffer, VmaAllocation allocation, VmaAllocationInfo& allocationInfo);
+			void CreateIndexBuffer(vector<uint16_t>& indices, VkBuffer& buffer, VmaAllocation allocation, VmaAllocationInfo& allocationInfo);
 			void CreateVertexBuffer(vector<VertexPNT>& vertices, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo& allocationInfo);
 			void CreateUniformBuffer(VkDeviceSize bufferSize, vector<VkBuffer>& buffers, vector<VkDeviceMemory>& memorys, vector<void*>& maps);
 			vector<VkDescriptorSet> CreateDescriptorSets(VkDescriptorSetLayout descriptorSetLayout, vector<VkBuffer>& uniformBuffers);

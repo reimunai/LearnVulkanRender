@@ -26,7 +26,8 @@ namespace el
 			void InitPipelineFamily(PipelineConfig config,vector<VkDescriptorSetLayoutBinding>& binds);
 			VkDevice GetDevice();
 			VkDescriptorSetLayout GetDescriptorSetLayout();
-			void Render(vector<VkBuffer>& vertexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets);
+			void Render(vector<uint16_t>& indexCounts,
+				vector<VkBuffer>& vertexBuffers, vector<VkBuffer>& indexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets);
 
 			void UpdateUniform(vector<void*> uniformBuffersMapped);
 			void UpdateUniform(vector<void*> uniformBuffersMapped, glm::vec3 pos);

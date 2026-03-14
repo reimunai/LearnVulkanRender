@@ -50,15 +50,20 @@ namespace el
 			std::vector<VertexPNT> mesh;
 			std::vector<uint16_t> indices;
 
-			VkBuffer buffer;
+			VkBuffer vertexBuffer;
 			VmaAllocation allocation;
 			VmaAllocationInfo allocationInfo;
+
+			VkBuffer indexBuffer;
+			VmaAllocation indexAllocation;
+			VmaAllocationInfo indexAllocationInfo;
 			// Í¨¹ý IComponent ¼Ì³Ð
 			void RenderInit(VulkanMemory& vulkanMemory)
 			{
 				if (mesh.size() != 0)
 				{
-					vulkanMemory.CreateVertexBuffer(mesh, buffer, allocation, allocationInfo);
+					vulkanMemory.CreateVertexBuffer(mesh, vertexBuffer, allocation, allocationInfo);
+					vulkanMemory.CreateIndexBuffer(indices, indexBuffer, indexAllocation, indexAllocationInfo);
 				}
 			}
 
@@ -67,6 +72,7 @@ namespace el
 			//record bindbuffer & draw cmd
 		};
 
+		//TODO:uniform BUffer
 		class Transform : public IComponent
 		{
 		public:
