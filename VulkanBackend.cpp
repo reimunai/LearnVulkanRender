@@ -1,4 +1,3 @@
-#pragma once
 #include "VulkanBackend.h"
 
 using namespace el::backend;
@@ -546,7 +545,8 @@ void VulkanBackend::RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pipe
 		uint32_t count = 1;
 		vector<VkDeviceSize> offsets(count, 0);
 		vkCmdBindVertexBuffers(cmdBuffer, 0, count, &vertexBuffers[i], offsets.data());
-		vkCmdBindIndexBuffer(cmdBuffer, indexBuffers[i], 0, VK_INDEX_TYPE_UINT16);
+		//TODO:注意VK_INDEX_TYPE_UINT32 or VK_INDEX_TYPE_UINT16
+		vkCmdBindIndexBuffer(cmdBuffer, indexBuffers[i], 0, VK_INDEX_TYPE_UINT32);
 		vkCmdBindDescriptorSets(
 			cmdBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -797,7 +797,7 @@ void VulkanMemory::Cleanup()
 	vkFreeCommandBuffers(backend->device, backend->commandPool, 1, &transferCmdBuffer);
 }
 
-void VulkanMemory::CreateIndexBuffer(vector<uint16_t>& indices, VkBuffer& buffer, VmaAllocation allocation, VmaAllocationInfo& allocationInfo)
+void VulkanMemory::CreateIndexBuffer(el::VertexIndice& indices, VkBuffer& buffer, VmaAllocation allocation, VmaAllocationInfo& allocationInfo)
 {
 	VkDeviceSize size = sizeof(indices[0]) * indices.size();
 	VkBufferCreateInfo bufferInfo{
@@ -818,7 +818,7 @@ void VulkanMemory::CreateIndexBuffer(vector<uint16_t>& indices, VkBuffer& buffer
 	vmaFlushAllocation(allocator, allocation, 0, size);
 	vmaUnmapMemory(allocator, allocation);
 }
-void VulkanMemory::CreateVertexBuffer(vector<VertexPNT>& vertices, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo& allocationInfo)
+void VulkanMemory::CreateVertexBuffer(vector<ElVertexPNT>& vertices, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo& allocationInfo)
 {
 	VkDeviceSize size = sizeof(vertices[0]) * vertices.size();
 	VkBufferCreateInfo bufferCreateInfo{
@@ -1023,8 +1023,8 @@ VkPipeline VulkanPipeline::CreatePipeline(PipelineConfig config, VkPipelineLayou
 	//vertexInputInfo顶点输入
 	//TODO:
 	//支持不同顶点数据结构
-	auto bindingDescription = VertexPNT::getBindingDescription();
-	auto attributeDescriptions = VertexPNT::getAttributeDescriptions();
+	auto bindingDescription = ElVertexPNT::getBindingDescription();
+	auto attributeDescriptions = ElVertexPNT::getAttributeDescriptions();
 	VkPipelineVertexInputStateCreateInfo vertexInputState{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
 		.vertexBindingDescriptionCount = 1,

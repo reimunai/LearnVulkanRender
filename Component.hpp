@@ -1,3 +1,6 @@
+#ifndef COMPONENT_H
+
+
 #pragma once
 #include <vector>
 #include <glm/vec3.hpp>
@@ -47,8 +50,8 @@ namespace el
 		class MeshRenderer : public IComponent
 		{
 		public:
-			std::vector<VertexPNT> mesh;
-			std::vector<uint16_t> indices;
+			std::vector<ElVertexPNT> mesh;
+			el::VertexIndice indices;
 
 			VkBuffer vertexBuffer;
 			VmaAllocation allocation;
@@ -96,3 +99,4 @@ namespace el
 		};
 	}
 }
+#endif // !COMPONENT_H

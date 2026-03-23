@@ -16,11 +16,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "shaderLoader.h"
+#include "VertexStruct.h"
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
-#include <array>
 #include <iostream>
 
 #include <chrono>
@@ -102,7 +102,7 @@ namespace el
 		}
 	};
 
-	struct VertexPNT
+	/*struct VertexPNT
 	{
 		glm::vec3 pos;
 		glm::vec3 normal;
@@ -137,7 +137,7 @@ namespace el
 
 			return attributeDescriptions;
 		}
-	};
+	};*/
 
 	struct UniformBufferObject {
 		glm::mat4 model;
@@ -312,8 +312,8 @@ namespace el
 			VmaAllocator allocator;
 		public:
 			VulkanMemory(VulkanBackend& backend);
-			void CreateIndexBuffer(vector<uint16_t>& indices, VkBuffer& buffer, VmaAllocation allocation, VmaAllocationInfo& allocationInfo);
-			void CreateVertexBuffer(vector<VertexPNT>& vertices, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo& allocationInfo);
+			void CreateIndexBuffer(el::VertexIndice& indices, VkBuffer& buffer, VmaAllocation allocation, VmaAllocationInfo& allocationInfo);
+			void CreateVertexBuffer(vector<ElVertexPNT>& vertices, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo& allocationInfo);
 			void CreateUniformBuffer(VkDeviceSize bufferSize, vector<VkBuffer>& buffers, vector<VkDeviceMemory>& memorys, vector<void*>& maps);
 			vector<VkDescriptorSet> CreateDescriptorSets(VkDescriptorSetLayout descriptorSetLayout, vector<VkBuffer>& uniformBuffers);
 			

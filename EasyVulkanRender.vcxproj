@@ -99,11 +99,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>I:\VulkanSDK\Include;E:\stb\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>I:\VulkanSDK\Include;E:\stb\stb_image;E:\JsonHeader;E:\tinyGltf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
@@ -118,11 +118,11 @@
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>I:\VulkanSDK\Include;E:\stb\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>I:\VulkanSDK\Include;E:\stb\stb_image;E:\JsonHeader;E:\tinyGltf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="application.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="GltfLoader.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="shaderLoader.cpp" />
     <ClCompile Include="VulkanBackend.cpp" />
@@ -143,8 +144,10 @@
     <ClInclude Include="application.h" />
     <ClInclude Include="Component.hpp" />
     <ClInclude Include="EcsSceneManager.hpp" />
+    <ClInclude Include="GltfLoader.h" />
     <ClInclude Include="PipelineManagement.h" />
     <ClInclude Include="shaderLoader.h" />
+    <ClInclude Include="VertexStruct.h" />
     <ClInclude Include="VulkanBackend.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

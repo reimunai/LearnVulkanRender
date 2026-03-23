@@ -1,4 +1,3 @@
-#pragma once
 #include "application.h"
 using namespace el::app;
 

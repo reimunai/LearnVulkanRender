@@ -1,8 +1,9 @@
-#pragma once
+#define _CRT_SECURE_NO_WARNINGS
 #define STB_IMAGE_IMPLEMENTATION
 #include "Component.hpp"
 #include "application.h"
 #include "shaderLoader.h"
+#include "GltfLoader.h"
 #include <string>
 
 #include <stb_image.h>
@@ -10,6 +11,8 @@
 using namespace el::backend;
 using namespace el::component;
 using namespace el::app;
+
+const string meshFilePath = "meshs/mk.gltf";
 
 auto app = new Application();
 #pragma region tutorial
@@ -342,8 +345,8 @@ int main()
 	vector<VkBuffer> uniformBuffers;
 	vector<VkDeviceMemory> uniformMemorys;
 	vector<VkDescriptorSet> dscrptSets;
-	vector<void*> map;
 	auto size = sizeof(el::UniformBufferObject);
+	vector<void*> map;
 	app->memory->CreateUniformBuffer(size, uniformBuffers, uniformMemorys, map);
 	dscrptSets = app->memory->CreateDescriptorSets(app->GetDescriptorSetLayout(), uniformBuffers);
 
@@ -365,16 +368,20 @@ int main()
 
 	Entity e1;
 	auto renderer1 = e1.AddComponent<MeshRenderer>();
-	renderer1->mesh = {
-		{{-0.5f, -0.5f, 0.0f}, {0.6f, 0.6f, 0.6f},{0.0f, 1.0f}},
-		{{0.5f, -0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {1.0f, 1.0f}},
-		{{0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {1.0f, 0.0f}},
-		{{-0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {0.0f, 0.0f}},
-	};
-	renderer1->indices = {
-		0, 1, 2,
-		0, 2, 3,
-	};
+	//renderer1->mesh = {
+	//	{{-0.5f, -0.5f, 0.0f}, {0.6f, 0.6f, 0.6f},{0.0f, 1.0f}},
+	//	{{0.5f, -0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {1.0f, 1.0f}},
+	//	{{0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {1.0f, 0.0f}},
+	//	{{-0.5f, 0.5f, 0.0f}, {0.6f, 0.6f, 0.6f}, {0.0f, 0.0f}},
+	//};
+	//renderer1->indices = {
+	//	0, 1, 2,
+	//	0, 2, 3,
+	//};
+	if (LoadGLTFMeshVertices(meshFilePath, renderer1->mesh, renderer1->indices) != true)
+	{
+		throw std::runtime_error("failed to load gltf!");
+	}
 	renderer1->RenderInit(*(app->memory));
 
 	Entity e2;

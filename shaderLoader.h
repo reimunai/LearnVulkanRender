@@ -1,8 +1,12 @@
+#ifndef SHADERLOADER_H
+
+
 #pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <string>
 #include <fstream>
+
 using  std::string;
 using std::vector;
 namespace el
@@ -17,3 +21,4 @@ namespace el
 		};
 	}
 }
+#endif // !SHADERLOADER_H

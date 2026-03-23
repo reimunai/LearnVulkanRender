@@ -1,4 +1,3 @@
-#pragma once
 #include "shaderLoader.h"
 
 using namespace el::resourcemanagement;
