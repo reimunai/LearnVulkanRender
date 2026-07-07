@@ -9,7 +9,7 @@
 
 using  std::string;
 using std::vector;
-namespace el
+namespace wl
 {
 	namespace resourcemanagement
 	{

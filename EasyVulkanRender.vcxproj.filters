@@ -22,18 +22,18 @@
     <Filter Include="头文件\ApplicationLayer">
       <UniqueIdentifier>{e7b36ccc-2e25-450a-9ccb-a5b0983361f7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\BackendLayer\VkBackend">
+      <UniqueIdentifier>{49578d5f-1285-42c6-b171-509b3ef39f97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\BackendLayer\VkResources">
+      <UniqueIdentifier>{ec92a81d-2b74-4bae-ac6b-5322784d66ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Test">
+      <UniqueIdentifier>{14d653c6-c43c-4622-9282-4ceae0ce2d40}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanBackend.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="shaderLoader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="application.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Component.cpp">
@@ -42,21 +42,45 @@
     <ClCompile Include="GltfLoader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="VertexStruct.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="VkBackend.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="VkRender.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="VkResources.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineBuilder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPassBuilder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameBufferBuilder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Buffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PbrTest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EcsSceneManager.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Component.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanBackend.h">
-      <Filter>头文件\BackendLayer</Filter>
-    </ClInclude>
     <ClInclude Include="shaderLoader.h">
-      <Filter>头文件\ResourceManagement</Filter>
-    </ClInclude>
-    <ClInclude Include="PipelineManagement.h">
       <Filter>头文件\ResourceManagement</Filter>
     </ClInclude>
     <ClInclude Include="application.h">
@@ -67,6 +91,33 @@
     </ClInclude>
     <ClInclude Include="GltfLoader.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="VkBackend.h">
+      <Filter>头文件\BackendLayer\VkBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="VkRender.h">
+      <Filter>头文件\BackendLayer\VkBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="VkResources.h">
+      <Filter>头文件\BackendLayer\VkResources</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineBuilder.h">
+      <Filter>头文件\BackendLayer\VkResources</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPassBuilder.h">
+      <Filter>头文件\BackendLayer\VkResources</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameBufferBuilder.h">
+      <Filter>头文件\BackendLayer\VkResources</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>头文件\BackendLayer\VkResources</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>头文件\BackendLayer\VkResources</Filter>
+    </ClInclude>
+    <ClInclude Include="PbrTest.h">
+      <Filter>头文件\Test</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -21,6 +21,7 @@ std::vector<T> GetAccessorData(const tinygltf::Model& model, const tinygltf::Acc
     for (size_t i = 0; i < accessor.count; ++i) {
         size_t offset = startOffset + i * stride;
 
+        //TODO:other componentType
         if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
             T value;
             memcpy(&value, &buffer.data[offset], elementSize);
@@ -38,7 +39,7 @@ std::vector<T> GetAccessorData(const tinygltf::Model& model, const tinygltf::Acc
 }
 
 // 主函数：读取gltf文件并填充顶点数据
-bool LoadGLTFMeshVertices(const std::string& filename, std::vector<el::ElVertexPNT>& vertices, el::VertexIndice& indices) {
+bool LoadGLTFMeshVertices(const std::string& filename, std::vector<wl::ElVertexPNT>& vertices, wl::VertexIndice& indices) {
     tinygltf::Model model;
     tinygltf::TinyGLTF loader;
     std::string err;
@@ -109,7 +110,7 @@ bool LoadGLTFMeshVertices(const std::string& filename, std::vector<el::ElVertexP
 
                 size_t vertexCount = positions.size();
                 for (size_t i = 0; i < vertexCount; ++i) {
-                    el::ElVertexPNT vertex;
+                    wl::ElVertexPNT vertex;
                     vertex.pos = positions[i];
                     vertex.normal = (i < normals.size()) ? normals[i] : glm::vec3(0.0f);
                     vertex.texCoord = (i < texCoords.size()) ? texCoords[i] : glm::vec2(0.0f);
@@ -132,23 +133,3 @@ bool LoadGLTFMeshVertices(const std::string& filename, std::vector<el::ElVertexP
 
     return true;
 }
-
-// 使用示例
-//int main() {
-//    std::vector<el::ElVertexPNT> vertices;
-//
-//    if (LoadGLTFMeshVertices("model.gltf", vertices)) {
-//        std::cout << "成功加载 " << vertices.size() << " 个顶点" << std::endl;
-//
-//        // 打印前几个顶点的数据作为验证
-//        for (size_t i = 0; i < std::min(vertices.size(), size_t(5)); ++i) {
-//            const auto& v = vertices[i];
-//            std::cout << "顶点 " << i << ": "
-//                << "位置(" << v.pos.x << ", " << v.pos.y << ", " << v.pos.z << "), "
-//                << "法线(" << v.normal.x << ", " << v.normal.y << ", " << v.normal.z << "), "
-//                << "UV(" << v.texCoord.x << ", " << v.texCoord.y << ")" << std::endl;
-//        }
-//    }
-//
-//    return 0;
-//}

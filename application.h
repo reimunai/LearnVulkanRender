@@ -1,11 +1,14 @@
 #pragma once
+#ifndef APPLICATION_H
+#define APPLICATION_H
+
 #include "VulkanBackend.h"
 
-namespace el
+namespace wl
 {
 	namespace app
 	{
-		using namespace el::backend;
+		using namespace wl::backend;
 		//TODO:
 		//½ö²âÊÔ
 		class Application
@@ -34,3 +37,5 @@ namespace el
 		};
 	}
 }
+
+#endif // !APPLICATION_H

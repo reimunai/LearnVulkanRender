@@ -6,7 +6,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
 #include "VulkanBackend.h"
-namespace el
+namespace wl
 {
 	struct Vertex
 	{
@@ -16,7 +16,7 @@ namespace el
 	};
 	namespace component
 	{
-		using namespace el::backend;
+		using namespace wl::backend;
 		class IComponent
 		{
 		public:
@@ -51,7 +51,7 @@ namespace el
 		{
 		public:
 			std::vector<ElVertexPNT> mesh;
-			el::VertexIndice indices;
+			wl::VertexIndice indices;
 
 			VkBuffer vertexBuffer;
 			VmaAllocation allocation;

@@ -5,9 +5,10 @@
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
-namespace el
+#include "vma/vk_mem_alloc.h"
+namespace wl
 {
-	
+	//TODO: need typedef name header file
 	typedef std::vector<uint32_t> VertexIndice;
 	struct ElVertexPNT
 	{
@@ -15,41 +16,56 @@ namespace el
 		glm::vec3 normal;
 		glm::vec2 texCoord;
 
-		static VkVertexInputBindingDescription getBindingDescription() {
-			VkVertexInputBindingDescription bindingDescription{};
-			bindingDescription.binding = 0;
-			bindingDescription.stride = sizeof(ElVertexPNT);
-			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		static VkVertexInputBindingDescription getBindingDescription();
 
-			return bindingDescription;
-		}
+		//static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
 
-		static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-			std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-
-			attributeDescriptions[0].binding = 0;
-			attributeDescriptions[0].location = 0;
-			attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[0].offset = offsetof(ElVertexPNT, pos);
-
-			attributeDescriptions[1].binding = 0;
-			attributeDescriptions[1].location = 1;
-			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[1].offset = offsetof(ElVertexPNT, normal);
-
-			attributeDescriptions[2].binding = 0;
-			attributeDescriptions[2].location = 2;
-			attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-			attributeDescriptions[2].offset = offsetof(ElVertexPNT, texCoord);
-
-			return attributeDescriptions;
-		}
+		static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 	};
 	struct MVPUniform
 	{
 		glm::mat4 model;
 		glm::mat4 view;
 		glm::mat4 proj;
+	};
+	struct ElBuffer
+	{
+		VkBuffer buffer;
+		VmaAllocation allocation;
+		VmaAllocationInfo allocationInfo;
+	};
+
+	enum class CullMode
+	{
+		None = VK_CULL_MODE_NONE,
+		Front = VK_CULL_MODE_FRONT_BIT,
+		Back = VK_CULL_MODE_BACK_BIT,
+		FrondAanBack = VK_CULL_MODE_FRONT_AND_BACK,
+
+	};
+	enum class BlendMode
+	{
+		None,
+		Transparent,
+	};
+
+	struct PipelineConfig
+	{
+		//shader
+		//vertex input descriptor
+		//inputassembly
+			//topology mode
+		//rasterizationState 
+			//polygonMode
+			//cullmode
+			//front face
+		//color blend
+		uint32_t shaderID;
+		CullMode cullMode;
+		BlendMode blendMode;
+
+		VkShaderModule vertexShaderModule;
+		VkShaderModule fragShaderModule;
 	};
 }
 

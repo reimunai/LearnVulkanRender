@@ -133,22 +133,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="application.cpp" />
+    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="FrameBufferBuilder.cpp" />
     <ClCompile Include="GltfLoader.cpp" />
-    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="PbrTest.cpp" />
+    <ClCompile Include="PipelineBuilder.cpp" />
+    <ClCompile Include="RenderPassBuilder.cpp" />
     <ClCompile Include="shaderLoader.cpp" />
-    <ClCompile Include="VulkanBackend.cpp" />
+    <ClCompile Include="Test.cpp" />
+    <ClCompile Include="VertexStruct.cpp" />
+    <ClCompile Include="VkBackend.cpp" />
+    <ClCompile Include="VkRender.cpp" />
+    <ClCompile Include="VkResources.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="Buffer.h" />
     <ClInclude Include="Component.hpp" />
-    <ClInclude Include="EcsSceneManager.hpp" />
+    <ClInclude Include="FrameBufferBuilder.h" />
     <ClInclude Include="GltfLoader.h" />
-    <ClInclude Include="PipelineManagement.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="PbrTest.h" />
+    <ClInclude Include="PipelineBuilder.h" />
+    <ClInclude Include="RenderPassBuilder.h" />
     <ClInclude Include="shaderLoader.h" />
     <ClInclude Include="VertexStruct.h" />
-    <ClInclude Include="VulkanBackend.h" />
+    <ClInclude Include="VkBackend.h" />
+    <ClInclude Include="VkRender.h" />
+    <ClInclude Include="VkResources.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

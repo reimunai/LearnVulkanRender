@@ -1,6 +1,6 @@
 #include "shaderLoader.h"
 
-using namespace el::resourcemanagement;
+using namespace wl::resourcemanagement;
 
 VkShaderModule ShaderLoader::createShaderModule(const vector<char>& code, VkDevice device)
 {
