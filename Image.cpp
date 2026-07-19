@@ -40,7 +40,13 @@ Image::Builder::Builder(VkDevice device, VmaAllocator& allocator, uint32_t width
 	};
 }
 
-Image::Builder Image::Builder::SetImageFormat(VkFormat format)
+Image::Builder& Image::Builder::SetImageFlag(VkImageCreateFlags flags)
+{
+	imageCreateInfo.flags = flags;
+	return *this;
+}
+
+Image::Builder& Image::Builder::SetImageFormat(VkFormat format)
 {
 	imageCreateInfo.format = format;
 
@@ -48,19 +54,19 @@ Image::Builder Image::Builder::SetImageFormat(VkFormat format)
 	return *this;
 }
 
-Image::Builder Image::Builder::SetImageUsage(VkImageUsageFlags usage)
+Image::Builder& Image::Builder::SetImageUsage(VkImageUsageFlags usage)
 {
 	imageCreateInfo.usage = usage;
 	return *this;
 }
 
-Image::Builder Image::Builder::SetImageLayout(VkImageLayout layout)
+Image::Builder& Image::Builder::SetImageInitialLayout(VkImageLayout layout)
 {
 	imageCreateInfo.initialLayout = layout;
 	return *this;
 }
 
-Image::Builder Image::Builder::SetImageViewAspectMask(VkImageAspectFlags aspectMask)
+Image::Builder& Image::Builder::SetImageViewAspectMask(VkImageAspectFlags aspectMask)
 {
 	imageViewCreateInfo.subresourceRange.aspectMask = aspectMask;
 	return *this;

@@ -11,19 +11,19 @@ FrameBufferBuilder::FrameBufferBuilder(VkDevice device, VkRenderPass renderPass,
 	this->height = height;
 }
 
-FrameBufferBuilder FrameBufferBuilder::AddAttachment(VkImageView imageView)
+FrameBufferBuilder& FrameBufferBuilder::AddAttachment(VkImageView imageView)
 {
 	attachments.push_back(imageView);
 	return *this;
 }
 
-FrameBufferBuilder wl::backend::FrameBufferBuilder::SetAttackments(std::vector<VkImageView>& imageViews)
+FrameBufferBuilder& wl::backend::FrameBufferBuilder::SetAttackments(std::vector<VkImageView>& imageViews)
 {
 	this->attachments = imageViews;
 	return *this;
 }
 
-FrameBufferBuilder FrameBufferBuilder::ClearAttachment()
+FrameBufferBuilder& FrameBufferBuilder::ClearAttachment()
 {
 	attachments.clear();
 	return *this;

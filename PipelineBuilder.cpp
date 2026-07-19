@@ -11,7 +11,7 @@ PipelineBuilder::PipelineBuilder(VkDevice device, VkPipelineLayout& pipelineLayo
 	vertexShaderModule = ShaderLoader::createShaderModule(vertexShaderCode, device);
 	fragShaderModule = ShaderLoader::createShaderModule(fragShaderCode, device);
 
-	bindingDescription = ElVertexPNT::getBindingDescription();
+	vertexInputBindingDescription = ElVertexPNT::getBindingDescription();
 	attributeDescriptions = ElVertexPNT::getAttributeDescriptions();
 
 	blendMode = BlendMode::None;
@@ -30,81 +30,99 @@ PipelineBuilder::PipelineBuilder(VkDevice device, VkPipelineLayout& pipelineLayo
 	};
 }
 
-PipelineBuilder PipelineBuilder::SetVertexShasderModule(VkShaderModule vertexShaderModule)
+PipelineBuilder& PipelineBuilder::SetVertexShasderModule(VkShaderModule vertexShaderModule)
 {
 	this->vertexShaderModule = vertexShaderModule;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetFragShaderModule(VkShaderModule fragShaderModule)
+PipelineBuilder& PipelineBuilder::SetFragShaderModule(VkShaderModule fragShaderModule)
 {
 	this->fragShaderModule = fragShaderModule;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetBindingDescription(VkVertexInputBindingDescription bindDescription)
+PipelineBuilder& PipelineBuilder::EnableVertexInput(bool value)
 {
-	this->bindingDescription = bindDescription;
+	this->isVertexInputAble = value;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetAttributeDescriptions(std::vector<VkVertexInputAttributeDescription> attributeDescriptions)
+PipelineBuilder& PipelineBuilder::SetVertexInputBindingDescription(VkVertexInputBindingDescription bindDescription)
+{
+	this->vertexInputBindingDescription = bindDescription;
+	return *this;
+}
+
+PipelineBuilder& PipelineBuilder::SetAttributeDescriptions(std::vector<VkVertexInputAttributeDescription> attributeDescriptions)
 {
 	this->attributeDescriptions = attributeDescriptions;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetBlendMode(BlendMode blendMode)
+PipelineBuilder& PipelineBuilder::SetColorAttachmentCount(int count)
+{
+	attachmentCount = count;
+	return *this;
+}
+
+PipelineBuilder& PipelineBuilder::SetBlendMode(BlendMode blendMode)
 {
 	this->blendMode = blendMode;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetCullMode(CullMode cullMode)
+PipelineBuilder& PipelineBuilder::SetCullMode(CullMode cullMode)
 {
 	this->cullMode = cullMode;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetDepthTest(bool enable)
+PipelineBuilder& PipelineBuilder::SetDepthTest(bool enable)
 {
 	depthStencilStateCI.depthTestEnable = enable ? VK_TRUE : VK_FALSE;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetDepthWrite(bool enable)
+PipelineBuilder& PipelineBuilder::SetDepthWrite(bool enable)
 {
 	depthStencilStateCI.depthWriteEnable = enable ? VK_TRUE : VK_FALSE;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetDepthBoundsTest(bool enable)
+PipelineBuilder& PipelineBuilder::SetDepthBoundsTest(bool enable)
 {
 	depthStencilStateCI.depthBoundsTestEnable = enable ? VK_TRUE : VK_FALSE;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetStencilTest(bool enable)
+PipelineBuilder& PipelineBuilder::SetStencilTest(bool enable)
 {
 	depthStencilStateCI.stencilTestEnable = enable ? VK_TRUE : VK_FALSE;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetDepthCompareOp(VkCompareOp compareOp)
+PipelineBuilder& PipelineBuilder::SetDepthCompareOp(VkCompareOp compareOp)
 {
 	depthStencilStateCI.depthCompareOp = compareOp;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetPipelineLayout(VkPipelineLayout& pipelineLayout)
+PipelineBuilder& PipelineBuilder::SetPipelineLayout(VkPipelineLayout& pipelineLayout)
 {
 	this->pipelineLayout = pipelineLayout;
 	return *this;
 }
 
-PipelineBuilder PipelineBuilder::SetRenderPass(VkRenderPass& renderPass)
+PipelineBuilder& PipelineBuilder::SetRenderPass(VkRenderPass& renderPass)
 {
 	this->renderPass = renderPass;
+	return *this;
+}
+
+PipelineBuilder& wl::backend::PipelineBuilder::SetTargetSubpass(int index)
+{
+	targetSubpassIndex = index;
 	return *this;
 }
 
@@ -130,10 +148,17 @@ VkPipeline PipelineBuilder::Build()
 	VkPipelineVertexInputStateCreateInfo vertexInputState{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
 		.vertexBindingDescriptionCount = 1,
-		.pVertexBindingDescriptions = &bindingDescription,
+		.pVertexBindingDescriptions = &vertexInputBindingDescription,
 		.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
 		.pVertexAttributeDescriptions = attributeDescriptions.data(),
 	};
+	if (!isVertexInputAble)
+	{
+		vertexInputState.vertexBindingDescriptionCount = 0;
+		vertexInputState.pVertexAttributeDescriptions = nullptr;
+		vertexInputState.vertexAttributeDescriptionCount = 0;
+		vertexInputState.pVertexAttributeDescriptions = nullptr;
+	}
 
 	//TODO:
 	//可选topology
@@ -173,9 +198,9 @@ VkPipeline PipelineBuilder::Build()
 	unsigned int mask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 	//TODO:
 	//颜色混合模式配置
-	VkPipelineColorBlendAttachmentState blendAttachment;
+	//VkPipelineColorBlendAttachmentState blendAttachment;
 
-	if (blendMode == BlendMode::None)
+	/*if (blendMode == BlendMode::None)
 	{
 		blendAttachment = {
 		.blendEnable = VK_FALSE,
@@ -197,12 +222,17 @@ VkPipeline PipelineBuilder::Build()
 
 		.colorWriteMask = mask,
 		};
-	}
+	}*/
 
+	//TODO:
+	std::vector<VkPipelineColorBlendAttachmentState> blendAttachments(attachmentCount, {
+			.blendEnable = VK_FALSE,
+			.colorWriteMask = mask
+		});
 	VkPipelineColorBlendStateCreateInfo colorBlendState{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-		.attachmentCount = 1,
-		.pAttachments = &blendAttachment
+		.attachmentCount = attachmentCount,
+		.pAttachments = blendAttachments.data()
 	};
 
 	//光栅化
@@ -239,7 +269,7 @@ VkPipeline PipelineBuilder::Build()
 	.pDynamicState = &dynamicState,
 	.layout = pipelineLayout,
 	.renderPass = renderPass,
-	.subpass = 0
+	.subpass = static_cast<uint32_t>(targetSubpassIndex)
 	};
 	VkPipeline pipeline;
 	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineCI, nullptr, &pipeline) != VK_SUCCESS)

@@ -8,7 +8,7 @@ RenderPassBuilder::RenderPassBuilder(VkDevice device)
 	this->device = device;
 }
 
-RenderPassBuilder RenderPassBuilder::AddAttachment(VkFormat format, VkImageLayout finalLayout)
+RenderPassBuilder& RenderPassBuilder::AddAttachment(VkFormat format, VkImageLayout finalLayout)
 {
 	Attachments.push_back({
 		.format = format,
@@ -24,19 +24,19 @@ RenderPassBuilder RenderPassBuilder::AddAttachment(VkFormat format, VkImageLayou
 	return *this;
 }
 
-RenderPassBuilder RenderPassBuilder::AddSubpass(VkSubpassDescription subpass)
+RenderPassBuilder& RenderPassBuilder::AddSubpass(VkSubpassDescription subpass)
 {
 	subpasses.push_back(subpass);
 	return *this;
 }
 
-RenderPassBuilder RenderPassBuilder::AddDependency(VkSubpassDependency dependency)
+RenderPassBuilder& RenderPassBuilder::AddDependency(VkSubpassDependency dependency)
 {
 	dependencies.push_back(dependency);
 	return *this;
 }
 
-RenderPassBuilder RenderPassBuilder::SetDepthAttachment(VkFormat format)
+RenderPassBuilder& RenderPassBuilder::SetDepthAttachment(VkFormat format)
 {
 	depthAttachment = {
 		.format = format,

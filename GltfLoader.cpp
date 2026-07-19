@@ -1,5 +1,5 @@
 #define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
+//#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "GltfLoader.h"
 
 #include <iostream>

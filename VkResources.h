@@ -30,19 +30,19 @@ namespace wl
 			void CreateVertexBuffer(std::vector<ElVertexPNT>& vertices, ElBuffer& elBuffer);
 			void CreateUniformBuffer(VkDeviceSize bufferSize, std::vector<ElBuffer>& elUniformBuffers);
 			void CreateImage(int texWidth, int texHeight, VkImage& image, VmaAllocation& allocation);
-			void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-
 			VkDescriptorSetLayout CreateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& bindings);
-			VkPipelineLayout CreatePipelineLayout(VkDescriptorSetLayout& descriptorSetLayout);
 			VkRenderPass CreateRenderPass(VkFormat imageFormat);
 			VkPipeline CreatePipeline(PipelineConfig config, VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass);
-
 			std::vector<VkDescriptorSet> CreateDescriptorSets(VkDescriptorSetLayout descriptorSetLayout);
 			VkImageView CreateTextureImageView(VkImage image);
 
+
+
+			VkPipelineLayout CreatePipelineLayout(VkDescriptorSetLayout& descriptorSetLayout);
+			VkSampler CreateTextureSampler();
+			void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 			void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
-			VkSampler CreateTextureSampler();
 		private:
 			void InitVma();
 			void InitDescriptorPool();

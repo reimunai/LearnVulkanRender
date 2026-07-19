@@ -199,7 +199,6 @@ std::vector<VkDescriptorSet> VkResources::CreateDescriptorSets(VkDescriptorSetLa
 
 VkImageView VkResources::CreateTextureImageView(VkImage image)
 {
-	//TODO:抽象为方法
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image = image;
@@ -314,7 +313,7 @@ void VkResources::InitVma()
 
 	if (vmaCreateAllocator(&vmaCI, &vmaAllocator) != VK_SUCCESS)
 	{
-		std::cerr << "Get Presentation Support error!" << std::endl;
+		throw std::runtime_error("VMA allocator creation failed in VkResources::InitVma");
 	}
 }
 
@@ -322,18 +321,21 @@ void VkResources::InitDescriptorPool()
 {
 	int maxFramesInFlight = 2;
 	//ImageTextureTest
-	std::array<VkDescriptorPoolSize, 2> poolSizes{};
+	std::array<VkDescriptorPoolSize, 3> poolSizes{};
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	poolSizes[0].descriptorCount = static_cast<uint32_t>(maxFramesInFlight);
 	poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	poolSizes[1].descriptorCount = static_cast<uint32_t>(maxFramesInFlight);
+	poolSizes[2].type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+	poolSizes[2].descriptorCount = static_cast<uint32_t>(maxFramesInFlight) * 10;
+
 
 	VkDescriptorPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 	poolInfo.pPoolSizes = poolSizes.data();
 	//TODO::池过小, maxSets
-	poolInfo.maxSets = static_cast<uint32_t>(maxFramesInFlight) * 2.0f;
+	poolInfo.maxSets = static_cast<uint32_t>(maxFramesInFlight* 10) ;
 
 	if (vkCreateDescriptorPool(vkBackend->device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create descriptor pool!");
@@ -447,8 +449,6 @@ VkPipeline VkResources::CreatePipeline(PipelineConfig config, VkPipelineLayout& 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
 	//vertexInputInfo顶点输入
-	//TODO:
-	//支持不同顶点数据结构
 	auto bindingDescription = ElVertexPNT::getBindingDescription();
 	auto attributeDescriptions = ElVertexPNT::getAttributeDescriptions();
 	VkPipelineVertexInputStateCreateInfo vertexInputState{

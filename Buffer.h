@@ -13,15 +13,16 @@ namespace wl::v1::backend
 		VkBuffer vkBuffer;
 
 		//uint64_t size;
-		VmaAllocator* allocator;
+		VmaAllocator allocator;
 		VmaAllocation allocation;
 		VmaAllocationInfo allocationInfo;
 
 	public:
 		~Buffer();
+		Buffer(Buffer&& other);
 		void CopyDataToBuffer(void* data);
 	private:
-		Buffer();
+		Buffer()=default;
 
 	public:
 		class Builder
@@ -29,17 +30,17 @@ namespace wl::v1::backend
 		private:
 			VmaAllocator& allocator;
 			uint64_t size;
-			VkBufferUsageFlagBits bufferUsage;
+			VkBufferUsageFlags bufferUsage;
 
-			VmaAllocationCreateFlagBits memoryFLag;
+			VmaAllocationCreateFlags memoryFLag;
 			VmaMemoryUsage memoryUsage;
 
 		public:
-			Builder(VmaAllocator& allocator, uint64_t size, VkBufferUsageFlagBits bufferUsage);
-			Buffer::Builder SetBufferUsage(VkBufferUsageFlagBits usage);
-			Buffer::Builder SetSize(uint64_t size);
-			Buffer::Builder SetMemoryFlag(VmaAllocationCreateFlagBits memoryFLag);
-			Buffer::Builder SetMemoryUsage(VmaMemoryUsage memoryUsage);
+			Builder(VmaAllocator& allocator, uint64_t size, VkBufferUsageFlags bufferUsage);
+			Buffer::Builder& SetBufferUsage(VkBufferUsageFlags usage);
+			Buffer::Builder& SetSize(uint64_t size);
+			Buffer::Builder& SetMemoryFlag(VmaAllocationCreateFlags memoryFLag);
+			Buffer::Builder& SetMemoryUsage(VmaMemoryUsage memoryUsage);
 			Buffer Build();
 		};
 	};

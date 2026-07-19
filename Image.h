@@ -33,13 +33,29 @@ namespace wl::backend
 
 			public:
 				Builder(VkDevice device, VmaAllocator& allocator, uint32_t width, uint32_t height);
-				Builder SetImageFormat(VkFormat format);
-				Builder SetImageUsage(VkImageUsageFlags usage);
-				Builder SetImageLayout(VkImageLayout layout);
-				Builder SetImageViewAspectMask(VkImageAspectFlags aspectMask);
-
-				VkImageCreateInfo GetImageCreateInfo() const { return imageCreateInfo; }
-				VkImageViewCreateInfo GetImageViewCreateInfo() const { return imageViewCreateInfo; }
+				Builder& SetImageFlag(VkImageCreateFlags flags);
+				Builder& SetImageFormat(VkFormat format);
+				Builder& SetImageUsage(VkImageUsageFlags usage);
+				Builder& SetImageInitialLayout(VkImageLayout layout);
+				Builder& SetImageViewAspectMask(VkImageAspectFlags aspectMask);
+				Builder& SetMipLevels(int level)
+				{
+					imageCreateInfo.mipLevels = level;
+					return *this;
+				}
+				Builder& SetArrayLayers(int count)
+				{
+					imageCreateInfo.arrayLayers = count;
+					imageViewCreateInfo.subresourceRange.layerCount = static_cast<uint32_t>(count);
+					return *this;
+				}
+				Builder& SetViewType(VkImageViewType type)
+				{
+					imageViewCreateInfo.viewType = type;
+					return *this;
+				}
+				VkImageCreateInfo& GetImageCreateInfo() { return imageCreateInfo; }
+				VkImageViewCreateInfo& GetImageViewCreateInfo() { return imageViewCreateInfo; }
 
 				Image Build();
 		};

@@ -18,22 +18,14 @@ namespace wl
 		{
 		public:
 			//window surface handle
-			//SDL_Window* window = nullptr;
 			VkSurfaceKHR surface = nullptr;
 			VkSurfaceCapabilitiesKHR surfaceCaps{};
 			//present swapchain
 			VkSwapchainKHR swapchain = nullptr;
 			std::vector<VkImage> swapchainImages;
 			std::vector<VkImageView> swapChainImageViews;
-			std::vector<VkFramebuffer> swapChainFramebuffers;
 
 			VkFormat swapchainImageFormat = VK_FORMAT_B8G8R8A8_SRGB;
-			VkRenderPass presentRenderPass;
-			//depth test
-			VkFormat depthFormat;
-			VkImage depthImage;
-			VkImageView depthImageView;
-			VmaAllocation depthImageAllocation;
 			//cmd
 			VkCommandPool commandPool;
 			std::vector<VkCommandBuffer> commandBuffers;
@@ -55,23 +47,30 @@ namespace wl
 			//void InitSDL(const char* title, int w, int h);
 			void CreateSurface(SDL_Window* window);
 
-			void SetDepthFormat();
-			void CreateDepthImage();
-
 			void CreateSwapchain();
-			void CreateSwapchainFramebuffers();
 			void RecreateSwapchain();
 			void CleanupSwapChain();
-			void CreatePresentRenderPass();
 
 			void CreateCommandPool();
 			void CreateCommandBuffers();
 			void CreateSyncObjects();
 		public:
-			void RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout, std::vector<uint16_t>& indexCounts,
-				std::vector<VkBuffer>& vertexBuffers, std::vector<VkBuffer>& indicesBuffers, std::vector<std::vector<VkDescriptorSet>>& descriptorSets);
-			void Render(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout, std::vector<uint16_t>& indexCounts,
-				std::vector<VkBuffer>& vertexBuffers, std::vector<VkBuffer>& indexBuffers, std::vector<std::vector<VkDescriptorSet>>& descriptorSets);
+			VkFormat GetSuitalbeDepthFormat();
+			void InitRecordCmdBuffer();
+			void BeginRenderPassCmd(VkRenderPass& renderPass, std::vector<VkClearValue>& clearValues, std::vector<VkFramebuffer>& frameBuffers);
+			void BindPipelineCmd(VkPipeline& pipeline);
+			void BindDataCmd(VkBuffer vertexBuffer, VkBuffer indexBuffer, VkPipelineLayout& pipelineLayout, std::vector<VkDescriptorSet>& dscrpsets);
+			void BindVertexCmd(VkBuffer vertexBuffer);
+			void BindIndexCmd(VkBuffer indexBuffer);
+			void BindDescriptorSets(VkPipelineLayout& pipelineLayout, std::vector<VkDescriptorSet>& dscrpsets);
+			void IndexDrawCmd(int indexCount);
+			void DrawCmd(int count);
+			void EndRenderPassCmd();
+			void EndRecordCmdBuffer();
+			void NextSubPass();
+			void ResetCmd();
+			void WaitReady();
+			void Render();
 		};
 	}
 }

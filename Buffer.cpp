@@ -4,7 +4,10 @@ using namespace wl::v1::backend;
 
 Buffer::~Buffer()
 {
-	vmaDestroyBuffer(*allocator, vkBuffer, allocation);
+	if (allocator != nullptr && vkBuffer != VK_NULL_HANDLE)
+	{
+		vmaDestroyBuffer(allocator, vkBuffer, allocation);
+	}
 }
 
 Buffer::Buffer(Buffer&& other)
@@ -14,46 +17,56 @@ Buffer::Buffer(Buffer&& other)
 	allocation = other.allocation;
 	allocationInfo = other.allocationInfo;
 
-	other.vkBuffer = nullptr;
+	other.vkBuffer = VK_NULL_HANDLE;
 	other.allocator = nullptr;
 	other.allocation = nullptr;
+	other.allocationInfo = {};
 }
 
 //Host allocatable buffer, copy data from CPU to GPU
 void Buffer::CopyDataToBuffer(void* data)
 {
+	if (allocator == nullptr || allocation == nullptr) {
+		throw std::runtime_error("Buffer::CopyDataToBuffer: allocator or allocation is null.");
+	}
 	size_t size =  allocationInfo.size;
-	void* pData;
-	vmaMapMemory(*allocator, allocation, &pData);
+	if (size == 0) {
+		throw std::runtime_error("Buffer::CopyDataToBuffer: allocation size is zero.");
+	}
+	void* pData = nullptr;
+	VkResult mapRes = vmaMapMemory(allocator, allocation, &pData);
+	if (mapRes != VK_SUCCESS || pData == nullptr) {
+		throw std::runtime_error("Buffer::CopyDataToBuffer: vmaMapMemory failed.");
+	}
 	memcpy(pData, data, size);
-	vmaFlushAllocation(*allocator, allocation, 0, size);
-	vmaUnmapMemory(*allocator, allocation);
+	vmaFlushAllocation(allocator, allocation, 0, size);
+	vmaUnmapMemory(allocator, allocation);
 }
 
-Buffer::Builder::Builder(VmaAllocator& allocator, uint64_t size, VkBufferUsageFlagBits bufferUsage) :
+Buffer::Builder::Builder(VmaAllocator& allocator, uint64_t size, VkBufferUsageFlags bufferUsage) :
 	allocator(allocator), size(size), bufferUsage(bufferUsage) 
 {
 	memoryFLag = static_cast<VmaAllocationCreateFlagBits>(VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT);
 	memoryUsage = VMA_MEMORY_USAGE_AUTO;
 }
-Buffer::Builder Buffer::Builder::SetBufferUsage(VkBufferUsageFlagBits usage)
+Buffer::Builder& Buffer::Builder::SetBufferUsage(VkBufferUsageFlags usage)
 {
-	bufferUsage = usage;
+	this->bufferUsage = usage;
 	return *this;
 }
-Buffer::Builder Buffer::Builder::SetSize(uint64_t size)
+Buffer::Builder& Buffer::Builder::SetSize(uint64_t size)
 {
 	this->size = size;
 	return *this;
 }
 
-Buffer::Builder Buffer::Builder::SetMemoryFlag(VmaAllocationCreateFlagBits memoryFLag)
+Buffer::Builder& Buffer::Builder::SetMemoryFlag(VmaAllocationCreateFlags memoryFLag)
 {
 	this->memoryFLag = memoryFLag;
 	return *this;
 }
 
-Buffer::Builder Buffer::Builder::SetMemoryUsage(VmaMemoryUsage memoryUsage)
+Buffer::Builder& Buffer::Builder::SetMemoryUsage(VmaMemoryUsage memoryUsage)
 {
 	this->memoryUsage = memoryUsage;
 	return *this;
@@ -62,7 +75,7 @@ Buffer::Builder Buffer::Builder::SetMemoryUsage(VmaMemoryUsage memoryUsage)
 Buffer Buffer::Builder::Build()
 {
 	Buffer buffer;
-	buffer.allocator = &allocator;
+	buffer.allocator = allocator;
 
 	VkBufferCreateInfo bufferCreateInfo{
 		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,

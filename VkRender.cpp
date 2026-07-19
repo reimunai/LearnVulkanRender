@@ -12,91 +12,37 @@ VkRenderPresent::VkRenderPresent(VkBackend& backend, VmaAllocator vmaAllocator, 
 {
 	this->vmaAllocator = vmaAllocator;
 	this->vkBackend = &backend;
-	//InitSDL("Vulkan", 800, 600);
 	CreateSurface(window);
 	CreateSwapchain();
 
 
-	SetDepthFormat();
-	CreateDepthImage();
-	CreatePresentRenderPass();
-	CreateSwapchainFramebuffers();
+	GetSuitalbeDepthFormat();
 
 	CreateCommandPool();
 	CreateCommandBuffers();
 	CreateSyncObjects();
 }
-//void VkRenderPresent::InitSDL(const char* title, int w, int h)
-//{
-//	if (!SDL_Init(SDL_INIT_VIDEO))
-//	{
-//		std::cerr << "failed to init SDL" << std::endl;
-//		return;
-//	}
-//
-//	window = SDL_CreateWindow(title, w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
-//}
 
 void VkRenderPresent::CreateSurface(SDL_Window* window)
 {
 	SDL_Vulkan_CreateSurface(window, vkBackend->instance, nullptr, &surface);
 }
 
-void VkRenderPresent::SetDepthFormat()
+VkFormat VkRenderPresent::GetSuitalbeDepthFormat()
 {
+	VkFormat res;
 	std::vector<VkFormat> depthFormatList{ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
 	for (VkFormat& format : depthFormatList) {
 		VkFormatProperties2 formatProperties{ .sType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2 };
 		vkGetPhysicalDeviceFormatProperties2(vkBackend->phyDevice, format, &formatProperties);
 		//vkGetPhysicalDeviceFormatProperties(phyDevice, )
 		if (formatProperties.formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) {
-			depthFormat = format;
+			res = format;
 			break;
 		}
 	}
-}
 
-void VkRenderPresent::CreateDepthImage()
-{
-	VkImageCreateInfo depthImageInfo{
-		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-		.imageType = VK_IMAGE_TYPE_2D,
-		.format = depthFormat,
-		.extent{
-			.width = surfaceCaps.currentExtent.width,
-			.height = surfaceCaps.currentExtent.height,
-			.depth = 1
-		},
-		.mipLevels = 1,
-		.arrayLayers = 1,
-		.samples = VK_SAMPLE_COUNT_1_BIT,
-		.tiling = VK_IMAGE_TILING_OPTIMAL,
-		.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
-	};
-
-	VmaAllocationCreateInfo allocationCreateInfo{
-		.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT,
-		.usage = VMA_MEMORY_USAGE_AUTO,
-	};
-
-	if (vmaCreateImage(vmaAllocator, &depthImageInfo, &allocationCreateInfo, &depthImage, &depthImageAllocation, nullptr) != VK_SUCCESS)
-	{
-		throw std::runtime_error("failed to create Image!");
-	}
-
-	VkImageViewCreateInfo depthImageViewInfo{
-		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		.image = depthImage,
-		.viewType = VK_IMAGE_VIEW_TYPE_2D,
-		.format = depthFormat,
-		.subresourceRange{
-			.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
-			.levelCount = 1,
-			.layerCount = 1
-		},
-	};
-	vkCreateImageView(vkBackend->device, &depthImageViewInfo, nullptr, &depthImageView);
+	return res;
 }
 
 void VkRenderPresent::CreateSwapchain()
@@ -163,43 +109,18 @@ void VkRenderPresent::CreateSwapchain()
 	}
 }
 
-void VkRenderPresent::CreateSwapchainFramebuffers()
-{
-	swapChainFramebuffers.resize(swapChainImageViews.size());
-
-	FrameBufferBuilder frameBufferBuilder{
-		vkBackend->device,
-		presentRenderPass,
-		surfaceCaps.currentExtent.width,
-		surfaceCaps.currentExtent.height
-	};
-
-	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
-		std::vector<VkImageView> attachments = {
-			swapChainImageViews[i],
-			depthImageView,
-		};
-
-		swapChainFramebuffers[i] =
-			frameBufferBuilder
-			.SetAttackments(attachments)
-			.Build();
-	}
-}
-
 void VkRenderPresent::RecreateSwapchain()
 {
 	vkDeviceWaitIdle(vkBackend->device);
 
 	CleanupSwapChain();
 	CreateSwapchain();
-	CreateDepthImage();
-	CreateSwapchainFramebuffers();
 }
 
+//TODO:
 void VkRenderPresent::CleanupSwapChain()
 {
-	for (auto framebuffer : swapChainFramebuffers) {
+	/*for (auto framebuffer : swapChainFramebuffers) {
 		vkDestroyFramebuffer(vkBackend->device, framebuffer, nullptr);
 	}
 
@@ -207,71 +128,7 @@ void VkRenderPresent::CleanupSwapChain()
 		vkDestroyImageView(vkBackend->device, imageView, nullptr);
 	}
 
-	vkDestroySwapchainKHR(vkBackend->device, swapchain, nullptr);
-}
-
-void VkRenderPresent::CreatePresentRenderPass()
-{
-	VkAttachmentDescription colorAttachment{
-		.format = swapchainImageFormat,
-		.samples = VK_SAMPLE_COUNT_1_BIT,
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-		.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-		.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-	};
-	VkAttachmentDescription depthAttachment{
-		.format = depthFormat,
-		.samples = VK_SAMPLE_COUNT_1_BIT,
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-		.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-		.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-	};
-
-	VkAttachmentReference colorAttachmentRef{
-		.attachment = 0,
-		.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-	};
-	VkAttachmentReference depthAttachmentRef{
-		.attachment = 1,
-		.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-	};
-
-	VkSubpassDescription subpass{
-		.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-		.colorAttachmentCount = 1,
-		.pColorAttachments = &colorAttachmentRef,
-		.pDepthStencilAttachment = &depthAttachmentRef,
-		/*.pResolveAttachments = &colorAttachmentResolveRef*/
-	};
-
-	VkSubpassDependency dependency{};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-	dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-	std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
-	VkRenderPassCreateInfo renderPassInfo{
-		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-		.attachmentCount = static_cast<uint32_t>(attachments.size()),
-		.pAttachments = attachments.data(),
-		.subpassCount = 1,
-		.pSubpasses = &subpass,
-		.dependencyCount = 1,
-		.pDependencies = &dependency
-	};
-
-	if (vkCreateRenderPass(vkBackend->device, &renderPassInfo, nullptr, &presentRenderPass) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create render pass!");
-	}
+	vkDestroySwapchainKHR(vkBackend->device, swapchain, nullptr);*/
 }
 
 void VkRenderPresent::CreateCommandPool()
@@ -329,9 +186,7 @@ void VkRenderPresent::CreateSyncObjects()
 	}
 }
 
-//TODO:更好的cmd提交
-void VkRenderPresent::RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout, vector<uint16_t>& indexCounts,
-	vector<VkBuffer>& vertexBuffers, vector<VkBuffer>& indexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets)
+void VkRenderPresent::InitRecordCmdBuffer()
 {
 	VkCommandBuffer cmdBuffer = commandBuffers[currentFrame];
 	VkCommandBufferBeginInfo beginInfo{
@@ -358,74 +213,112 @@ void VkRenderPresent::RecordCommandBuffer(VkRenderPass renderPass, VkPipeline pi
 		.extent = surfaceCaps.currentExtent
 	};
 	vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+}
 
-	std::array <VkClearValue, 2 > clearValues;
-	clearValues[0] = { {0.0f, 0.0f, 0.0f, 1.0f} };
-	clearValues[1].depthStencil = { 1.0f, 0 };
+void VkRenderPresent::BeginRenderPassCmd(VkRenderPass& renderPass, std::vector<VkClearValue>& clearValues, std::vector<VkFramebuffer>& frameBuffers)
+{
 	VkRenderPassBeginInfo renderPassInfo{
 		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass = renderPass,
-		.framebuffer = swapChainFramebuffers[currentFrame],
+		.framebuffer = frameBuffers[currentFrame],
 		.renderArea{.offset = {0, 0},	.extent = surfaceCaps.currentExtent},
 		.clearValueCount = static_cast<uint32_t>(clearValues.size()),
 		.pClearValues = clearValues.data()
 	};
-	vkCmdBeginRenderPass(cmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+}
 
-	vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+void VkRenderPresent::BindPipelineCmd(VkPipeline& pipeline)
+{
+	vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+}
 
-	//uint32_t count = vertexBuffers.size();
-	//vector<VkDeviceSize> offsets(count, 0);
-	//vkCmdBindVertexBuffers(cmdBuffer, 0, count, vertexBuffers.data(), offsets.data());
-	//vkCmdBindDescriptorSets(
-	//	cmdBuffer,
-	//	VK_PIPELINE_BIND_POINT_GRAPHICS,
-	//	pipelineLayout,
-	//	0,
-	//	1,
-	//	&descriptorSets[currentFrame],
-	//	0,
-	//	nullptr);
+void VkRenderPresent::BindDataCmd(VkBuffer vertexBuffer, VkBuffer indexBuffer, VkPipelineLayout& pipelineLayout, std::vector<VkDescriptorSet>& dscrpsets)
+{
+	std::array<VkDeviceSize, 1> offsets{0};
+	vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, &vertexBuffer, offsets.data());
+	vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindDescriptorSets(
+		commandBuffers[currentFrame],
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		pipelineLayout,
+		0,
+		1,
+		&dscrpsets[currentFrame],
+		0,
+		nullptr
+	);
+}
 
-	//vkCmdDraw(cmdBuffer, 12, 1, 0, 0);
-	for (uint32_t i = 0; i < vertexBuffers.size(); i++)
-	{
-		uint32_t count = 1;
-		vector<VkDeviceSize> offsets(count, 0);
-		vkCmdBindVertexBuffers(cmdBuffer, 0, count, &vertexBuffers[i], offsets.data());
-		//TODO:注意VK_INDEX_TYPE_UINT32 or VK_INDEX_TYPE_UINT16
-		vkCmdBindIndexBuffer(cmdBuffer, indexBuffers[i], 0, VK_INDEX_TYPE_UINT32);
-		vkCmdBindDescriptorSets(
-			cmdBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pipelineLayout,
-			0,
-			1,
-			&descriptorSets[i][currentFrame],
-			0,
-			nullptr);
+void wl::backend::VkRenderPresent::BindVertexCmd(VkBuffer vertexBuffer)
+{
+	std::array<VkDeviceSize, 1> offsets{ 0 };
+	vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, &vertexBuffer, offsets.data());
+}
 
-		//vkCmdDraw(cmdBuffer, 12, 1, 0, 0);
-		vkCmdDrawIndexed(cmdBuffer, static_cast<uint32_t>(indexCounts[i]), 1, 0, 0, 0);
-	}
+void wl::backend::VkRenderPresent::BindIndexCmd(VkBuffer indexBuffer)
+{
+	vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+}
 
-	vkCmdEndRenderPass(cmdBuffer);
+void wl::backend::VkRenderPresent::BindDescriptorSets(VkPipelineLayout& pipelineLayout, std::vector<VkDescriptorSet>& dscrpsets)
+{
+	vkCmdBindDescriptorSets(
+		commandBuffers[currentFrame],
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		pipelineLayout,
+		0,
+		1,
+		&dscrpsets[currentFrame],
+		0,
+		nullptr
+	);
+}
 
-	if (vkEndCommandBuffer(cmdBuffer) != VK_SUCCESS) {
+void VkRenderPresent::IndexDrawCmd(int indexCount)
+{
+	vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indexCount), 1, 0, 0, 0);
+}
+
+void VkRenderPresent::DrawCmd(int count)
+{
+	vkCmdDraw(commandBuffers[currentFrame], static_cast<uint32_t>(count), 1, 0, 0);
+}
+
+void VkRenderPresent::NextSubPass()
+{
+	vkCmdNextSubpass(commandBuffers[currentFrame], VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void VkRenderPresent::EndRenderPassCmd()
+{
+	vkCmdEndRenderPass(commandBuffers[currentFrame]);
+}
+
+void VkRenderPresent::EndRecordCmdBuffer()
+{
+	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
 }
 
-void VkRenderPresent::Render(VkRenderPass renderPass, VkPipeline pipeline, VkPipelineLayout pipelineLayout, vector<uint16_t>& indexCounts,
-	vector<VkBuffer>& vertexBuffers, vector<VkBuffer>& indexBuffers, vector<vector<VkDescriptorSet>>& descriptorSets)
+void VkRenderPresent::ResetCmd()
+{
+	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
+}
+
+void VkRenderPresent::WaitReady()
 {
 	vkWaitForFences(vkBackend->device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+	vkResetFences(vkBackend->device, 1, &inFlightFences[currentFrame]);
+}
 
-
+void VkRenderPresent::Render()
+{
 	uint32_t imageIndex;
 	VkResult result = vkAcquireNextImageKHR(vkBackend->device, swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+	/*if (result == VK_ERROR_OUT_OF_DATE_KHR)
 	{
 		RecreateSwapchain();
 		return;
@@ -433,15 +326,7 @@ void VkRenderPresent::Render(VkRenderPass renderPass, VkPipeline pipeline, VkPip
 	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
 	{
 		throw std::runtime_error("failed to acquire swap chain image!");
-	}
-
-	vkResetFences(vkBackend->device, 1, &inFlightFences[currentFrame]);
-
-
-	//TODO:
-	//更好的cmd提交
-	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-	RecordCommandBuffer(renderPass, pipeline, pipelineLayout, indexCounts, vertexBuffers, indexBuffers, descriptorSets);
+	}*/
 
 	//submit info
 	VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };

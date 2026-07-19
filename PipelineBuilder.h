@@ -17,38 +17,44 @@ namespace wl::backend
 		VkShaderModule vertexShaderModule;
 		VkShaderModule fragShaderModule;
 
-		VkVertexInputBindingDescription bindingDescription;
+		bool isVertexInputAble = true;
+		VkVertexInputBindingDescription vertexInputBindingDescription;
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
-
+		uint32_t attachmentCount = 1;
 		BlendMode blendMode;
 
 		CullMode cullMode;
 
 		VkPipelineLayout pipelineLayout;
 		VkRenderPass renderPass;
+		int targetSubpassIndex = 0;
 
 		VkPipelineDepthStencilStateCreateInfo depthStencilStateCI{};
 
 	public :
 		PipelineBuilder(VkDevice device, VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass);
 
-		PipelineBuilder SetVertexShasderModule(VkShaderModule vertexShaderModule);
-		PipelineBuilder SetFragShaderModule(VkShaderModule fragShaderModule);
+		PipelineBuilder& SetVertexShasderModule(VkShaderModule vertexShaderModule);
+		PipelineBuilder& SetFragShaderModule(VkShaderModule fragShaderModule);
 
-		PipelineBuilder SetBindingDescription(VkVertexInputBindingDescription bindDescription);
-		PipelineBuilder SetAttributeDescriptions(std::vector<VkVertexInputAttributeDescription> attributeDescriptions);
+		PipelineBuilder& EnableVertexInput(bool value);
+		PipelineBuilder& SetVertexInputBindingDescription(VkVertexInputBindingDescription bindDescription);
+		PipelineBuilder& SetAttributeDescriptions(std::vector<VkVertexInputAttributeDescription> attributeDescriptions);
 
-		PipelineBuilder SetBlendMode(BlendMode blendMode);
-		PipelineBuilder SetCullMode(CullMode cullMode);
+		PipelineBuilder& SetColorAttachmentCount(int count);
 
-		PipelineBuilder SetDepthTest(bool enable);
-		PipelineBuilder SetDepthWrite(bool enable);
-		PipelineBuilder SetDepthBoundsTest(bool enable);
-		PipelineBuilder SetStencilTest(bool enable);
-		PipelineBuilder SetDepthCompareOp(VkCompareOp compareOp);
+		PipelineBuilder& SetBlendMode(BlendMode blendMode);
+		PipelineBuilder& SetCullMode(CullMode cullMode);
 
-		PipelineBuilder SetPipelineLayout(VkPipelineLayout& pipelineLayout);
-		PipelineBuilder SetRenderPass(VkRenderPass& renderPass);
+		PipelineBuilder& SetDepthTest(bool enable);
+		PipelineBuilder& SetDepthWrite(bool enable);
+		PipelineBuilder& SetDepthBoundsTest(bool enable);
+		PipelineBuilder& SetStencilTest(bool enable);
+		PipelineBuilder& SetDepthCompareOp(VkCompareOp compareOp);
+
+		PipelineBuilder& SetPipelineLayout(VkPipelineLayout& pipelineLayout);
+		PipelineBuilder& SetRenderPass(VkRenderPass& renderPass);
+		PipelineBuilder& SetTargetSubpass(int index);
 
 		VkPipeline Build();
 

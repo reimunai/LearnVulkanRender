@@ -18,16 +18,15 @@ namespace wl::backend
 		std::vector<VkSubpassDescription> subpasses;
 		std::vector<VkSubpassDependency> dependencies;
 
-		std::vector<VkAttachmentReference> colorAttachmentRefs;
 		VkAttachmentReference depthAttachmentRef;
 
 	public:
 		RenderPassBuilder(VkDevice device);
 
-		RenderPassBuilder AddAttachment(VkFormat format, VkImageLayout finalLayout);
-		RenderPassBuilder AddSubpass(VkSubpassDescription subpass);
-		RenderPassBuilder AddDependency(VkSubpassDependency dependency);
-		RenderPassBuilder SetDepthAttachment(VkFormat format);
+		RenderPassBuilder& AddAttachment(VkFormat format, VkImageLayout finalLayout);
+		RenderPassBuilder& AddSubpass(VkSubpassDescription subpass);
+		RenderPassBuilder& AddDependency(VkSubpassDependency dependency);
+		RenderPassBuilder& SetDepthAttachment(VkFormat format);
 
 		VkRenderPass Build();
 	};

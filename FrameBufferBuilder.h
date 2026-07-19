@@ -16,9 +16,9 @@ namespace wl::backend
 		uint32_t layers = 1;
 	public:
 		FrameBufferBuilder(VkDevice device, VkRenderPass renderPass, uint32_t width, uint32_t height);
-		FrameBufferBuilder AddAttachment(VkImageView imageView);
-		FrameBufferBuilder SetAttackments(std::vector<VkImageView>& imageViews);
-		FrameBufferBuilder ClearAttachment();
+		FrameBufferBuilder& AddAttachment(VkImageView imageView);
+		FrameBufferBuilder& SetAttackments(std::vector<VkImageView>& imageViews);
+		FrameBufferBuilder& ClearAttachment();
 		VkFramebuffer Build();
 	};
 }
