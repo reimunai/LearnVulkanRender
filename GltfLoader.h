@@ -9,6 +9,6 @@
 template<typename T>
 std::vector<T> GetAccessorData(const tinygltf::Model& model, const tinygltf::Accessor& accessor);
 
-bool LoadGLTFMeshVertices(const std::string& filename, std::vector<wl::ElVertexPNT>& vertices, wl::VertexIndice& indices);
+bool LoadGLTFMeshVertices(const std::string& filename, std::vector<wl::ElVertexPNT>& vertices, std::vector<wl::VertexIndice>& indices);
 
 #endif // !GLTFLOADER_H

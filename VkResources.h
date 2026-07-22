@@ -26,7 +26,7 @@ namespace wl
 
 			//memory
 			ElBuffer CreateTransferBuffer(void* data, VkDeviceSize size);
-			void CreateIndexBuffer(wl::VertexIndice& indices, ElBuffer& elBuffer);
+			void CreateIndexBuffer(std::vector<wl::VertexIndice>& indices, ElBuffer& elBuffer);
 			void CreateVertexBuffer(std::vector<ElVertexPNT>& vertices, ElBuffer& elBuffer);
 			void CreateUniformBuffer(VkDeviceSize bufferSize, std::vector<ElBuffer>& elUniformBuffers);
 			void CreateImage(int texWidth, int texHeight, VkImage& image, VmaAllocation& allocation);
@@ -37,9 +37,9 @@ namespace wl
 			VkImageView CreateTextureImageView(VkImage image);
 
 
-
 			VkPipelineLayout CreatePipelineLayout(VkDescriptorSetLayout& descriptorSetLayout);
 			VkSampler CreateTextureSampler();
+
 			void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 			void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 

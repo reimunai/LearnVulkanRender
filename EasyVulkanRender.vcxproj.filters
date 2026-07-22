@@ -31,12 +31,12 @@
     <Filter Include="头文件\Test">
       <UniqueIdentifier>{14d653c6-c43c-4622-9282-4ceae0ce2d40}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\ResourceLayer">
+      <UniqueIdentifier>{5ecb1aeb-a27f-4d6c-b617-6eb63dd918b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="shaderLoader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GltfLoader.cpp">
@@ -81,16 +81,25 @@
     <ClCompile Include="skyBoxTest.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeImageFactor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SamplerBuilder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Component.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="shaderLoader.h">
       <Filter>头文件\ResourceManagement</Filter>
-    </ClInclude>
-    <ClInclude Include="application.h">
-      <Filter>头文件\ApplicationLayer</Filter>
     </ClInclude>
     <ClInclude Include="VertexStruct.h">
       <Filter>头文件\BackendLayer</Filter>
@@ -130,6 +139,24 @@
     </ClInclude>
     <ClInclude Include="skyBoxTest.h">
       <Filter>头文件\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeImageFactor.h">
+      <Filter>头文件\ResourceLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Pipeline.h">
+      <Filter>头文件\ResourceLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Test.h">
+      <Filter>头文件\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerBuilder.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -101,3 +101,25 @@ wl::backend::Image::~Image()
 	vkDestroyImageView(device, vkImageView, nullptr);
 	vmaDestroyImage(*vmaAllocator, vkImage, allocation);
 }
+
+Image& wl::backend::Image::operator=(Image&& other)
+{
+	// TODO: 在此处插入 return 语句
+	device = other.device;
+	vkImage = other.vkImage;
+	vkImageView = other.vkImageView;
+
+	vmaAllocator = other.vmaAllocator;
+	allocation = other.allocation;
+	allocationInfo = other.allocationInfo;
+
+	other.device = VK_NULL_HANDLE;
+	other.vkImage = VK_NULL_HANDLE;
+	other.vkImageView = VK_NULL_HANDLE;
+
+	other.vmaAllocator = nullptr;
+	other.allocation = nullptr;
+	other.allocationInfo = {};
+
+	return *this;
+}

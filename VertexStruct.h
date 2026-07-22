@@ -9,7 +9,7 @@
 namespace wl
 {
 	//TODO: need typedef name header file
-	typedef std::vector<uint32_t> VertexIndice;
+	typedef uint32_t VertexIndice;
 	struct ElVertexPNT
 	{
 		glm::vec3 pos;

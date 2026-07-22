@@ -19,10 +19,13 @@ namespace wl::backend
 		VmaAllocationInfo allocationInfo;
 	public:
 		~Image();
+		Image(const Image&) = default;
+		Image& operator=(Image&&);
 	private:
 		Image() = default;
 
 	public:
+		//TODO:miplevel msaa samples
 		class Builder
 		{
 			private:
@@ -34,10 +37,12 @@ namespace wl::backend
 			public:
 				Builder(VkDevice device, VmaAllocator& allocator, uint32_t width, uint32_t height);
 				Builder& SetImageFlag(VkImageCreateFlags flags);
+				Builder& SetImageType(VkImageType type)
+				{
+					imageCreateInfo.imageType = type;
+					return *this;
+				}
 				Builder& SetImageFormat(VkFormat format);
-				Builder& SetImageUsage(VkImageUsageFlags usage);
-				Builder& SetImageInitialLayout(VkImageLayout layout);
-				Builder& SetImageViewAspectMask(VkImageAspectFlags aspectMask);
 				Builder& SetMipLevels(int level)
 				{
 					imageCreateInfo.mipLevels = level;
@@ -49,6 +54,10 @@ namespace wl::backend
 					imageViewCreateInfo.subresourceRange.layerCount = static_cast<uint32_t>(count);
 					return *this;
 				}
+				Builder& SetImageUsage(VkImageUsageFlags usage);
+				Builder& SetImageInitialLayout(VkImageLayout layout);
+
+				Builder& SetImageViewAspectMask(VkImageAspectFlags aspectMask);
 				Builder& SetViewType(VkImageViewType type)
 				{
 					imageViewCreateInfo.viewType = type;

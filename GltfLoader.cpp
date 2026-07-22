@@ -39,7 +39,7 @@ std::vector<T> GetAccessorData(const tinygltf::Model& model, const tinygltf::Acc
 }
 
 // 主函数：读取gltf文件并填充顶点数据
-bool LoadGLTFMeshVertices(const std::string& filename, std::vector<wl::ElVertexPNT>& vertices, wl::VertexIndice& indices) {
+bool LoadGLTFMeshVertices(const std::string& filename, std::vector<wl::ElVertexPNT>& vertices, std::vector<wl::VertexIndice>& indices) {
     tinygltf::Model model;
     tinygltf::TinyGLTF loader;
     std::string err;

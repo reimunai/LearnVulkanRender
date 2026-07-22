@@ -13,6 +13,18 @@ DescriptorAllocator::DescriptorAllocator(VkDevice device, int maxFlightFrame)
 
 	InitResourcesUniformPool();
 }
+wl::backend::DescriptorAllocator::~DescriptorAllocator()
+{
+	vkDestroyDescriptorPool(device, GlobalPool, nullptr);
+	vkDestroyDescriptorPool(device, ObjectUniformPool, nullptr);
+	vkDestroyDescriptorPool(device, ResourcesUniformPool, nullptr);
+
+	vkDestroyDescriptorSetLayout(device, globalSetLayout, nullptr);
+	vkDestroyDescriptorSetLayout(device, ObjectUniformLayout, nullptr);
+	vkDestroyDescriptorSetLayout(device, ResourcesUniformLayout, nullptr);
+
+
+}
 void wl::backend::DescriptorAllocator::InitSetLayout()
 {
 	globalBinds = {
@@ -35,7 +47,6 @@ void wl::backend::DescriptorAllocator::InitSetLayout()
 
 	ResourcesUniformBinds = {
 		{
-
 			.binding = 0,
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,

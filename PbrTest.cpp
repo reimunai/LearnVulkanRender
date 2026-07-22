@@ -323,7 +323,7 @@ void test::Test_Run()
 	ConfigLightPipeline(lightPipelineLayout);
 
 	vector<wl::ElVertexPNT> vertices;
-	wl::VertexIndice indices;
+	vector<wl::VertexIndice> indices;
 	LoadGLTFMeshVertices(meshFilePath, vertices, indices);
 
 	//el::ElBuffer vertexBuffer;

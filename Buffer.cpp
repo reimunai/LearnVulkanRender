@@ -9,7 +9,13 @@ Buffer::~Buffer()
 		vmaDestroyBuffer(allocator, vkBuffer, allocation);
 	}
 }
-
+Buffer::Buffer()
+{
+	this->vkBuffer = VK_NULL_HANDLE;
+	this->allocator = nullptr;
+	this->allocation = nullptr;
+	this->allocationInfo = {};
+}
 Buffer::Buffer(Buffer&& other)
 {
 	vkBuffer = other.vkBuffer;
@@ -21,6 +27,21 @@ Buffer::Buffer(Buffer&& other)
 	other.allocator = nullptr;
 	other.allocation = nullptr;
 	other.allocationInfo = {};
+}
+
+Buffer& wl::v1::backend::Buffer::operator=(Buffer&& other)
+{
+	this->vkBuffer = other.vkBuffer;
+	this->allocator = other.allocator;
+	this->allocation = other.allocation;
+	this->allocationInfo = other.allocationInfo;
+
+	other.vkBuffer = VK_NULL_HANDLE;
+	other.allocator = nullptr;
+	other.allocation = nullptr;
+	other.allocationInfo = {};
+
+	return *this;
 }
 
 //Host allocatable buffer, copy data from CPU to GPU

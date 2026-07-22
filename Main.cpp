@@ -1,7 +1,6 @@
-//#include "PbrTest.h"
-#include "skyBoxTest.h"
+
+#include "Test.h"
 int main()
 {
-	//test::Test_Run();
-	test::Sky_Box_Run();
+	test::Test_Run();
 }

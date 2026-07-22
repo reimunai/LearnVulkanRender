@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -134,15 +134,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Buffer.cpp" />
-    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="CubeImageFactor.cpp" />
     <ClCompile Include="DescriptorAllocator.cpp" />
     <ClCompile Include="FrameBufferBuilder.cpp" />
+    <ClCompile Include="Test.cpp" />
     <ClCompile Include="GltfLoader.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="PbrTest.cpp" />
     <ClCompile Include="PipelineBuilder.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderPassBuilder.cpp" />
+    <ClCompile Include="SamplerBuilder.cpp" />
     <ClCompile Include="shaderLoader.cpp" />
     <ClCompile Include="skyBoxTest.cpp" />
     <ClCompile Include="VertexStruct.cpp" />
@@ -151,21 +155,25 @@
     <ClCompile Include="VkResources.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="application.h" />
     <ClInclude Include="Buffer.h" />
-    <ClInclude Include="Component.hpp" />
+    <ClInclude Include="CubeImageFactor.h" />
     <ClInclude Include="DescriptorAllocator.h" />
     <ClInclude Include="FrameBufferBuilder.h" />
     <ClInclude Include="GltfLoader.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="PbrTest.h" />
+    <ClInclude Include="Pipeline.h" />
     <ClInclude Include="PipelineBuilder.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderPassBuilder.h" />
+    <ClInclude Include="SamplerBuilder.h" />
     <ClInclude Include="shaderLoader.h" />
     <ClInclude Include="skyBoxTest.h" />
     <ClInclude Include="VertexStruct.h" />
     <ClInclude Include="VkBackend.h" />
     <ClInclude Include="VkRender.h" />
+    <ClInclude Include="Test.h" />
     <ClInclude Include="VkResources.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

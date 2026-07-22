@@ -41,6 +41,7 @@ namespace wl::backend
 		uint32_t maxResourceUniformCount = 100;
 	public:
 		DescriptorAllocator(VkDevice device, int maxFlightFrame);
+		~DescriptorAllocator();
 		std::vector<VkDescriptorSet> AllocateDescriptorSets(SETTYPE type);
 		VkDescriptorSetLayout CreateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& bindings);
 		VkPipelineLayout CreatePipelineLayout(std::vector<VkDescriptorSetLayout>& descriptorSetLayouts);

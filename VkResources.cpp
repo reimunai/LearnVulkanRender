@@ -44,7 +44,7 @@ wl::ElBuffer VkResources::CreateTransferBuffer(void* data, VkDeviceSize size)
 	return ElBuffer{SrcBuffer, SrcAllocation, SrcAllocInfo};
 }
 
-void VkResources::CreateIndexBuffer(wl::VertexIndice& indices, ElBuffer& elBuffer)
+void VkResources::CreateIndexBuffer(std::vector<wl::VertexIndice>& indices, ElBuffer& elBuffer)
 {
 	VkDeviceSize size = sizeof(indices[0]) * indices.size();
 	VkBufferCreateInfo bufferInfo{

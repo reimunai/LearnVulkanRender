@@ -16,5 +16,6 @@ layout(location = 0) out vec3 outPos;
 void main()
 {
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
-    outPos = gl_Position.xyz;
+    gl_Position.z = gl_Position.w;
+    outPos = (ubo.model * vec4(inPosition, 1.0)).xyz;
 }

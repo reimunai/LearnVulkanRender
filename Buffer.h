@@ -18,11 +18,12 @@ namespace wl::v1::backend
 		VmaAllocationInfo allocationInfo;
 
 	public:
+		Buffer();
 		~Buffer();
 		Buffer(Buffer&& other);
+		Buffer& operator=(Buffer&& other);
 		void CopyDataToBuffer(void* data);
 	private:
-		Buffer()=default;
 
 	public:
 		class Builder

@@ -2,13 +2,18 @@
 #include "VkBackend.h"
 #include "VkRender.h"
 #include "VkResources.h"
+
 #include "RenderPassBuilder.h"
 #include "PipelineBuilder.h"
-#include "Buffer.h"
-#include "Image.h"
 #include "DescriptorAllocator.h"
 #include "shaderLoader.h"
+#include "CubeImageFactor.h"
+
+#include "Buffer.h"
+#include "Image.h"
+
 #include "GltfLoader.h"
+#include <chrono>
 
 #include <iostream>
 #include <vector>
@@ -20,6 +25,7 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include "FrameBufferBuilder.h"
 
+#include "Mesh.h"
 
 using std::vector;
 using std::string;
@@ -32,6 +38,7 @@ using namespace wl::backend;
 void test::Sky_Box_Run()
 {
 	//TODO:智能指针管理
+	//TODO:正确资源释放
 	SDL_Window* window = nullptr;
 	VkBackend* backend = nullptr;
 	VkResources* vkres = nullptr;
@@ -52,12 +59,12 @@ void test::Sky_Box_Run()
 
 	
 	vector<string> cubetexFilePath{
-		"textures/立方体贴图/cube_back_suburban_garden_2k.jpg",
-		"textures/立方体贴图/cube_bottom_suburban_garden_2k.jpg",
-		"textures/立方体贴图/cube_front_suburban_garden_2k.jpg",
-		"textures/立方体贴图/cube_left_suburban_garden_2k.jpg",
-		"textures/立方体贴图/cube_right_suburban_garden_2k.jpg",
-		"textures/立方体贴图/cube_top_suburban_garden_2k.jpg",
+		"textures/skybox/right.jpg",
+		"textures/skybox/left.jpg",
+		"textures/skybox/top.jpg",
+		"textures/skybox/bottom.jpg",
+		"textures/skybox/front.jpg",
+		"textures/skybox/back.jpg",
 	};
 	int texWidth, texHeight, texChannels;
 	stbi_uc* pixels = stbi_load(cubetexFilePath[0].c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -66,38 +73,9 @@ void test::Sky_Box_Run()
 	{
 		throw std::runtime_error("failed to load texture image!");
 	}
-
-	Buffer tbuffer =
-		Buffer::Builder(vkres->vmaAllocator, 6 * imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
-		.Build();
-
-	void* pData = nullptr;
-	vmaMapMemory(tbuffer.allocator, tbuffer.allocation, &pData);
-	memcpy(pData, pixels, imageSize);
-
-	for (int i = 1; i < 6; i++)
-	{
-		pixels = stbi_load(cubetexFilePath[i].c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		if (!pixels)
-		{
-			throw std::runtime_error("failed to load texture image!");
-		}
-		memcpy((uint8_t*)pData + imageSize * i, pixels, imageSize);
-	}
-	vmaFlushAllocation(tbuffer.allocator, tbuffer.allocation, 0, 6 * imageSize);
-	vmaUnmapMemory(tbuffer.allocator, tbuffer.allocation);
-
-	Image cubeImage =
-		Image::Builder(backend->device, vkres->vmaAllocator, texWidth, texHeight)
-		.SetImageFlag(VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT)
-		.SetImageFormat(VK_FORMAT_R8G8B8A8_SRGB)
-		.SetImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
-		.SetImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED)
-		.SetImageViewAspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
-		.SetArrayLayers(6)
-		.SetViewType(VK_IMAGE_VIEW_TYPE_CUBE)
-		.Build();
-
+	stbi_image_free(pixels);
+	auto cubeImage = wl::resource::CubeImageFactor::CreateCubeImage(backend->device, vkres->vmaAllocator, texWidth, texHeight);
+	wl::resource::CubeImageFactor::CopyTextureToCubeImage(cubeImage, cubetexFilePath, vkres->vmaAllocator, *backend);
 
 	VkPhysicalDeviceProperties properties;
 	vkGetPhysicalDeviceProperties(backend->phyDevice, &properties);
@@ -124,59 +102,6 @@ void test::Sky_Box_Run()
 	if (vkCreateSampler(backend->device, &samplerInfo, nullptr, &texSampler) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create texture sampler!");
 	}
-
-	VkImageMemoryBarrier barrier{
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.srcAccessMask = 0,
-		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-
-		.image = cubeImage.vkImage,
-		.subresourceRange{
-			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-			.baseMipLevel = 0,
-			.levelCount = 1,
-			.baseArrayLayer = 0,
-			.layerCount = 6,
-		},
-	};
-	auto cmd = backend->BeginOneTimesCommands();
-	vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-		0, 0, nullptr, 0, nullptr, 1, &barrier);
-
-	std::array<VkBufferImageCopy, 6>copyRegion{};
-	for (int i = 0; i < 6; i++)
-	{
-		copyRegion[i] = {
-			.bufferOffset = i * imageSize,
-			.bufferRowLength = 0,
-			.bufferImageHeight = 0,
-
-			.imageSubresource{
-				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-				.mipLevel = 0,
-				.baseArrayLayer = static_cast<uint32_t>(i),
-				.layerCount = 1
-			},
-
-			.imageOffset = {0, 0, 0},
-			.imageExtent = {static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1}
-		};
-	}
-	vkCmdCopyBufferToImage(cmd, tbuffer.vkBuffer, cubeImage.vkImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 6, copyRegion.data());
-
-	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-	vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		0, 0, nullptr, 0, nullptr, 1, &barrier);
-
-	backend->EndOneTimesCommands(cmd);
 
 	vector<VkDescriptorSetLayout> dscrptSetLayouts{
 		//dscrptAllocator->globalSetLayout,
@@ -222,38 +147,18 @@ void test::Sky_Box_Run()
 		.Build();
 
 	string meshFilePath = "meshs/cube10.gltf";
-	vector<wl::ElVertexPNT> vertices;
-	wl::VertexIndice indices;
-	LoadGLTFMeshVertices(meshFilePath, vertices, indices);
-
-	Buffer vertexBuffer =
-		Buffer::Builder(vkres->vmaAllocator, sizeof(wl::ElVertexPNT) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
-		.Build();
-
-	vertexBuffer.CopyDataToBuffer(vertices.data());
-
-	size_t indexByteSize = indices.size() * sizeof(indices[0]);
-	//size_t indexByteSize = sizeof(vector<uint32_t>) * indices.size();
-	//sizeof(vector<T>)为vector对象对象，和存储数据T无关
-	if (indexByteSize == 0) {
-		throw std::runtime_error("No index data loaded.");
-	}
-	Buffer indexBuffer =
-		Buffer::Builder(vkres->vmaAllocator, indexByteSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
-		.Build();
-
-	indexBuffer.CopyDataToBuffer(indices.data());
+	wl::component::Mesh cubeMesh(meshFilePath, vkres->vmaAllocator);
 
 	vector<Buffer> uniformBuffers;
 	wl::MVPUniform ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	//ubo.model = modelMat4;
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	ubo.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), vkRenderPresent->surfaceCaps.currentExtent.width / (float)vkRenderPresent->surfaceCaps.currentExtent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 	for (int i = 0; i < 2; i++)
 	{
 		uniformBuffers.push_back(Buffer::Builder(vkres->vmaAllocator, sizeof(wl::MVPUniform), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+			.SetMemoryFlag(VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT)
 			.Build());
 
 		uniformBuffers[i].CopyDataToBuffer(&ubo);
@@ -312,6 +217,7 @@ void test::Sky_Box_Run()
 	}
 
 
+	auto startTime1 = std::chrono::high_resolution_clock::now();
 	Uint64 startTime = SDL_GetPerformanceCounter();
 	Uint64 frequency = SDL_GetPerformanceFrequency();
 	bool quit = false;
@@ -326,6 +232,9 @@ void test::Sky_Box_Run()
 			}
 		}
 
+
+		auto currentTime1 = std::chrono::high_resolution_clock::now();
+		float time1 = std::chrono::duration<float, std::chrono::seconds::period>(currentTime1 - startTime1).count();
 		//TODO:for multiply subpass render
 		vkRenderPresent->WaitReady();
 		vkRenderPresent->ResetCmd();
@@ -336,8 +245,8 @@ void test::Sky_Box_Run()
 
 		vkRenderPresent->BeginRenderPassCmd(renderpass, clearValues, framebuffers);
 		vkRenderPresent->BindPipelineCmd(pipeline);
-		vkRenderPresent->BindVertexCmd(vertexBuffer.vkBuffer);
-		vkRenderPresent->BindIndexCmd(indexBuffer.vkBuffer);
+		vkRenderPresent->BindVertexCmd(cubeMesh.vertexBuffer.vkBuffer);
+		vkRenderPresent->BindIndexCmd(cubeMesh.indiceBuffer.vkBuffer);
 		vector<VkDescriptorSet> sets{Objdscrt[vkRenderPresent->currentFrame], ImageDscrt[0]};
 		//vkRenderPresent->BindDescriptorSets(pipelineLayout, sets);
 		vkCmdBindDescriptorSets(
@@ -350,7 +259,7 @@ void test::Sky_Box_Run()
 			0,
 			nullptr
 		);
-		vkRenderPresent->IndexDrawCmd(indices.size());
+		vkRenderPresent->IndexDrawCmd(cubeMesh.indices.size());
 		vkRenderPresent->EndRenderPassCmd();
 		vkRenderPresent->EndRecordCmdBuffer();
 
@@ -359,12 +268,19 @@ void test::Sky_Box_Run()
 		Uint64 currentTime = SDL_GetPerformanceCounter();
 		float deltaTime = (currentTime - startTime) / (float)frequency;
 		startTime = currentTime;
-
 		// 计算 FPS
 		float fps = 1.0f / deltaTime;
 		std::string titlie = std::to_string(fps);
+
+		//ubo.model = glm::rotate(glm::mat4(1.0f), time1 * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 rotateM = glm::rotate(glm::mat4(1.0f), time1 * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::vec4 cen(0.0f, -0.2f, 1.0f, 1.0f);
+		cen = rotateM * cen;
+		ubo.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(cen.x, cen.y, cen.z), glm::vec3(0.0f, 1.0f, 0.0f));
+		memcpy(uniformBuffers[vkRenderPresent->currentFrame].allocationInfo.pMappedData, &ubo, sizeof(wl::MVPUniform));
 	}
 
 	SDL_Quit();
-
+	vkDeviceWaitIdle(backend->device);
+	delete dscrptAllocator;
 }
