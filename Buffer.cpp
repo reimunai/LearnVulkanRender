@@ -16,7 +16,7 @@ Buffer::Buffer()
 	this->allocation = nullptr;
 	this->allocationInfo = {};
 }
-Buffer::Buffer(Buffer&& other)
+Buffer::Buffer(Buffer&& other) noexcept
 {
 	vkBuffer = other.vkBuffer;
 	allocator = other.allocator;
@@ -29,7 +29,7 @@ Buffer::Buffer(Buffer&& other)
 	other.allocationInfo = {};
 }
 
-Buffer& wl::v1::backend::Buffer::operator=(Buffer&& other)
+Buffer& wl::v1::backend::Buffer::operator=(Buffer&& other) noexcept
 {
 	this->vkBuffer = other.vkBuffer;
 	this->allocator = other.allocator;

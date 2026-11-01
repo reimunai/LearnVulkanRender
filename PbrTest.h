@@ -4,7 +4,7 @@
 namespace test
 {
 
-	void Test_Run();
+	void Pbr_Test_Run();
 }
 
 #endif // !PBR_TEST_H

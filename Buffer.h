@@ -20,8 +20,8 @@ namespace wl::v1::backend
 	public:
 		Buffer();
 		~Buffer();
-		Buffer(Buffer&& other);
-		Buffer& operator=(Buffer&& other);
+		Buffer(Buffer&& other) noexcept;
+		Buffer& operator=(Buffer&& other) noexcept;
 		void CopyDataToBuffer(void* data);
 	private:
 

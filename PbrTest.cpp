@@ -253,7 +253,7 @@ namespace test
 		return textureImage;
 	}
 }
-void test::Test_Run()
+void test::Pbr_Test_Run()
 {
 	if (!InitWindowAndVulkan())
 	{
@@ -369,7 +369,6 @@ void test::Test_Run()
 		.SetImageViewAspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
 		.Build();
 
-	//TODO:Biulder参数不保留问题
 	auto normalImage =
 		ImageBuilder
 		.SetImageFormat(VK_FORMAT_R16G16B16A16_SFLOAT)
